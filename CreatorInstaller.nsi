@@ -1,5 +1,6 @@
 !addincludedir "include" ;添加插件目录
 
+Unicode true
 
 !ifndef NSIS_UNICODE
 !AddPluginDir .\plugins
@@ -81,31 +82,30 @@ ReserveFile "resources\images\*.bmp"
 ReserveFile "resources\Skin\*.*"
 
 ; ;DLL
-; ReserveFile `Plugins\nsDialogs.dll`
-; ReserveFile `Plugins\nsWindows.dll`
-; ReserveFile `Plugins\SkinBtn.dll`
-; ReserveFile `Plugins\SkinButton.dll`
-; ReserveFile `Plugins\SkinProgress.dll`
-; ReserveFile `Plugins\System.dll`
-; ReserveFile `Plugins\WndProc.dll`
-; ReserveFile `Plugins\nsisSlideshow.dll`
-; ReserveFile `Plugins\FindProcDLL.dll`
-; ReserveFile `Plugins\Resource.dll`
-; ReserveFile `Plugins\nsResize.dll`
+ReserveFile `plugins\nsDialogs.dll`
+ReserveFile `plugins\nsWindows.dll`
+ReserveFile `plugins\SkinBtn.dll`
+ReserveFile `plugins\SkinButton.dll`
+ReserveFile `plugins\SkinProgress.dll`
+ReserveFile `plugins\System.dll`
+ReserveFile `plugins\WndProc.dll`
+ReserveFile `plugins\nsisSlideshow.dll`
+ReserveFile `plugins\FindProcDLL.dll`
+ReserveFile `plugins\Resource.dll`
+ReserveFile `plugins\nsResize.dll`
 
 ; ------ MUI 现代界面定义 (1.67 版本以上兼容) ------
 !include "MUI.nsh"
-; !include "WinCore.nsh"
-; !include "nsWindows.nsh"
-; !include "LogicLib.nsh"
-; !include "WinMessages.nsh"
-; !include "LoadRTF.nsh"
-; !include "nsResize.nsh"
-; !include "FileFunc.nsh"
-; !include "nsDialogs_createTextMultiline.nsh"
-; !include "LogicLib.nsh"
-; !include "GetProcessInfo.nsh"
-
+!include "WinCore.nsh"
+!include "nsWindows.nsh"
+!include "LogicLib.nsh"
+!include "WinMessages.nsh"
+!include "LoadRTF.nsh"
+!include "nsResize.nsh"
+!include "FileFunc.nsh"
+!include "nsDialogs_createTextMultiline.nsh"
+!include "LogicLib.nsh"
+!include "GetProcessInfo.nsh"
 
 ; installer
 !define MUI_CUSTOMFUNCTION_GUIINIT onGUIInit
@@ -140,7 +140,6 @@ Uninstpage custom un.InstallFinish
 !define MoveControlPositon `!insertmacro __MoveControl`
 !define FileTypeReg `!insertmacro __FileTypeReg`
 
-; 初始化函数
 Function .onInit
     ; 获取语言
     ${If} $LANGUAGE == 1033
@@ -151,14 +150,11 @@ Function .onInit
       Pop $IsEnglish
     ${EndIf}
 
-    LogSet on
-    InitPluginsDir ; 初始化插件
+    InitPluginsDir
 
-    ; 将界面所需图片文件解压到临时目录
     SetOutPath "${RESOURCE_IMG_PATH}"
     File /r "resources\images\*.bmp"
 
-    ;初始化
     ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_strongbtn.bmp"
     ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_Close.bmp"
     ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_custom.bmp"
@@ -172,7 +168,6 @@ FunctionEnd
 Function onGUIInit
   ;消除边框
     System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
-    ; 隐藏一些既有控件
     GetDlgItem $0 $HWNDPARENT 1034
     ShowWindow $0 ${SW_HIDE}
     GetDlgItem $0 $HWNDPARENT 1035
@@ -190,7 +185,7 @@ Function onGUIInit
     GetDlgItem $0 $HWNDPARENT 1028
     ShowWindow $0 ${SW_HIDE}
 
-    ${NSW_SetWindowSize} $HWNDPARENT 600 480 ;改变主窗体大小
+    ${NSW_SetWindowSize} $HWNDPARENT 600 480
     System::Call User32::GetDesktopWindow()i.R0
     ;圆角
     System::Alloc 16
@@ -203,7 +198,6 @@ Function onGUIInit
     System::Free $R0
 FunctionEnd
 
-;处理无边框移动
 Function onGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
