@@ -646,14 +646,14 @@ Pop $R1
 !define NSW_RestoreWindow `!insertmacro __NSW_RestoreWindow`
 
 !macro __NSW_SetCtlText HWND FileName
-/*;用法：
-;${NSW_SetCtlText} 控件句柄 文本文件名称
-;此宏改自Restools的SetText函数
-;链接：http://restools.hanzify.org/article.asp?id=29*/
-# 如果你对程序设计不熟悉，那么你可以不用理解这个过程，把它复制到你的脚本中就可以了。
-;  Exch $R0 ;${HWND}控件句柄
+/*;脫脙路篓拢潞
+;${NSW_SetCtlText} 驴脴录镁戮盲卤煤 脦脛卤戮脦脛录镁脙没鲁脝
+;麓脣潞锚赂脛脳脭Restools碌脛SetText潞炉脢媒
+;脕麓陆脫拢潞http://restools.hanzify.org/article.asp?id=29*/
+# 脠莽鹿没脛茫露脭鲁脤脨貌脡猫录脝虏禄脢矛脧陇拢卢脛脟脙麓脛茫驴脡脪脭虏禄脫脙脌铆陆芒脮芒赂枚鹿媒鲁脤拢卢掳脩脣眉赂麓脰脝碌陆脛茫碌脛陆脜卤戮脰脨戮脥驴脡脪脭脕脣隆拢
+;  Exch $R0 ;${HWND}驴脴录镁戮盲卤煤
 ;  Exch
-;  Exch $R1 ;${FileName}文件
+;  Exch $R1 ;${FileName}脦脛录镁
   StrCpy $R0 ${HWND}
   StrCpy $R1 "${FileName}"
 
@@ -663,13 +663,13 @@ Pop $R1
   Push $R5
 
   ClearErrors
-  FileOpen $R2 $R1 r ;$R2 = 文件句柄
-  ${Unless} ${Errors} ;确保打开文件没有发生错误
-    System::Call /NOUNLOAD "Kernel32::GetFileSize(i, i) i (R2, 0) .R3" ;$R3 = 文件大小
+  FileOpen $R2 $R1 r ;$R2 = 脦脛录镁戮盲卤煤
+  ${Unless} ${Errors} ;脠路卤拢麓貌驴陋脦脛录镁脙禄脫脨路垄脡煤麓铆脦贸
+    System::Call /NOUNLOAD "Kernel32::GetFileSize(i, i) i (R2, 0) .R3" ;$R3 = 脦脛录镁麓贸脨隆
     IntOp $R3 $R3 + 1
-    System::Alloc /NOUNLOAD $R3 ;分配内存
-    Pop $R4 ;内存地址
-      ${If} $R4 U> 0 ;确保分配了内存
+    System::Alloc /NOUNLOAD $R3 ;路脰脜盲脛脷麓忙
+    Pop $R4 ;脛脷麓忙碌脴脰路
+      ${If} $R4 U> 0 ;脠路卤拢路脰脜盲脕脣脛脷麓忙
           System::Call /NOUNLOAD "*(i 0) i .R5"
           System::Call /NOUNLOAD `Kernel32::ReadFile(i, i, i, i, i) i (R2, R4R4, R3, R5R5, 0)`
           System::Call /NOUNLOAD "*$R5(i .R1)"
@@ -677,7 +677,7 @@ Pop $R1
             System::Call /NOUNLOAD "User32::SendMessage(i, i, i, i) i (R0, ${WM_SETTEXT}, 0, R4)"
           ${EndIf}
           System::Free /NOUNLOAD $R5
-        System::Free $R4 ;释放内存
+        System::Free $R4 ;脢脥路脜脛脷麓忙
     ${EndIf}
     FileClose $R2
   ${EndUnless}

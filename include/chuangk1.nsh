@@ -1,11 +1,11 @@
-;Var MSG     ;MSG±äÁ¿±ØĞë¶¨Òå£¬¶øÇÒÔÚ×îÇ°Ãæ£¬·ñÔòWndProc::onCallback²»¹¤×÷£¬²å¼şÖĞĞèÒªÕâ¸öÏûÏ¢±äÁ¿,ÓÃÓÚ¼ÇÂ¼ÏûÏ¢ĞÅÏ¢
-Var BGImage2  ;±³¾°´óÍ¼
+;Var MSG     ;MSGå˜é‡å¿…é¡»å®šä¹‰ï¼Œè€Œä¸”åœ¨æœ€å‰é¢ï¼Œå¦åˆ™WndProc::onCallbackä¸å·¥ä½œï¼Œæ’ä»¶ä¸­éœ€è¦è¿™ä¸ªæ¶ˆæ¯å˜é‡,ç”¨äºè®°å½•æ¶ˆæ¯ä¿¡æ¯
+Var BGImage2  ;èƒŒæ™¯å¤§å›¾
 Var ImageHandle2
 Var WarningForm
 
 !include "nsWindows.nsh"
 
-;µ¯³ö¶Ô»°¿òÒÆ¶¯
+;å¼¹å‡ºå¯¹è¯æ¡†ç§»åŠ¨
 Function onWarningGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $WarningForm ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
@@ -17,51 +17,51 @@ IsWindow $WarningForm Create_End
     ;!define Style ${WS_VISIBLE}|${WS_OVERLAPPEDWINDOW}
     ;${NSW_CreateWindowEx} $WarningForm $hwndparent ${ExStyle} ${Style} "" 1018
     
-    ${NSW_CreateWindow} $WarningForm "" 1044   ;´´½¨´°¿Ú
-    ${NSW_CenterWindow} $WarningForm $hwndparent  ;½«´°¿Ú$WarningForm¾ÓÖĞÓÚ$hwndparent
+    ${NSW_CreateWindow} $WarningForm "" 1044   ;åˆ›å»ºçª—å£
+    ${NSW_CenterWindow} $WarningForm $hwndparent  ;å°†çª—å£$WarningFormå±…ä¸­äº$hwndparent
 
     ;${NSW_SetWindowSize} $WarningForm 374 153
     System::Call `user32::SetWindowLong(i$WarningForm,i${GWL_STYLE},0x9480084C)i.R0`
     EnableWindow $hwndparent 0
   
-	${NSW_CreateButton} 145u 79u 70 22 'È·¶¨'
+	${NSW_CreateButton} 145u 79u 70 22 'ç¡®å®š'
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_messanniu.bmp $1
   GetFunctionAddress $3 onClickclos
   SkinBtn::onClick $1 $3
 
-	${NSW_CreateButton} 195u 79u 70 22 'È¡Ïû'
+	${NSW_CreateButton} 195u 79u 70 22 'å–æ¶ˆ'
 	Pop $0
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_messanniu.bmp $0
   GetFunctionAddress $3 onClickCancel
   SkinBtn::onClick $0 $3
 
-  ;¹Ø±Õ°´Å¥
+  ;å…³é—­æŒ‰é’®
   ${NSW_CreateButton} 233u 2u 22 22 ""
 	Pop $0
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_messclose.bmp $0
   GetFunctionAddress $3 onClickCancel
   SkinBtn::onClick $0 $3
 
- 	;ÍË³öÌáÊ¾
-  ${NSW_CreateLabel} 52u 40u 170u 9u "ÄúÈ·¶¨ÒªÍË³ö${PRODUCT_NAME}°²×°¹ı³Ì£¿"
+ 	;é€€å‡ºæç¤º
+  ${NSW_CreateLabel} 52u 40u 170u 9u "æ‚¨ç¡®å®šè¦é€€å‡º${PRODUCT_NAME}å®‰è£…è¿‡ç¨‹ï¼Ÿ"
   Pop $R3
-  ;SetCtlColors $R2 "" 0xFFFFFF ;À¶É«
-  SetCtlColors $R3 ""  transparent ;±³¾°Éè³ÉÍ¸Ã÷
+  ;SetCtlColors $R2 "" 0xFFFFFF ;è“è‰²
+  SetCtlColors $R3 ""  transparent ;èƒŒæ™¯è®¾æˆé€æ˜
 
- 	;×óÉÏ½ÇÎÄ×Ö
-  ${NSW_CreateLabel} 6u 6u 150u 9u "ÌáÊ¾"
+ 	;å·¦ä¸Šè§’æ–‡å­—
+  ${NSW_CreateLabel} 6u 6u 150u 9u "æç¤º"
   Pop $R2
-  ;SetCtlColors $R2 "" 0xFFFFFF ;À¶É«
-  SetCtlColors $R2 ""  transparent ;±³¾°Éè³ÉÍ¸Ã÷
+  ;SetCtlColors $R2 "" 0xFFFFFF ;è“è‰²
+  SetCtlColors $R2 ""  transparent ;èƒŒæ™¯è®¾æˆé€æ˜
 
-	;±³¾°Í¼
+	;èƒŒæ™¯å›¾
 	${NSW_CreateBitmap} 0 0 380u 202u ""
   Pop $BGImage2
   ${NSW_SetImage} $BGImage2 $PLUGINSDIR\MessageDlgBkg.bmp $ImageHandle2
 
 	GetFunctionAddress $0 onWarningGUICallback
-	WndProc::onCallback $BGImage2 $0 ;´¦ÀíÎŞ±ß¿ò´°ÌåÒÆ¶¯
+	WndProc::onCallback $BGImage2 $0 ;å¤„ç†æ— è¾¹æ¡†çª—ä½“ç§»åŠ¨
 	WndProc::onCallback $R2 $0
 	WndProc::onCallback $R3 $0
 
@@ -72,28 +72,28 @@ IsWindow $WarningForm Create_End
 
 FunctionEnd
 
-Function onClickCancel ;È¡Ïû
+Function onClickCancel ;å–æ¶ˆ
   ;ShowWindow $WarningForm ${SW_HIDE}
-  ${NSW_DestroyWindow} $WarningForm  ;Ïú»Ù´°¿Ú, µ±È»ÄãÒ²¿ÉÒÔ»»³ÉÈÃ´°¿Ú1Òş²Ø
-  BringToFront                    ;½«Ö÷´°¿Ú¼¤»î
-  ${NSW_RestoreWindow} $hwndparent  ;»Ö¸´Ö÷´°¿Ú´óĞ¡
-  EnableWindow $hwndparent 1     ;ÆôÓÃÖ÷´°¿Ú
+  ${NSW_DestroyWindow} $WarningForm  ;é”€æ¯çª—å£, å½“ç„¶ä½ ä¹Ÿå¯ä»¥æ¢æˆè®©çª—å£1éšè—
+  BringToFront                    ;å°†ä¸»çª—å£æ¿€æ´»
+  ${NSW_RestoreWindow} $hwndparent  ;æ¢å¤ä¸»çª—å£å¤§å°
+  EnableWindow $hwndparent 1     ;å¯ç”¨ä¸»çª—å£
 FunctionEnd
 
 
 #------------------------------------------
-#¹Ø±Õ´úÂë
+#å…³é—­ä»£ç 
 #------------------------------------------
 Function onClickclos
- ${NSW_DestroyWindow} $WarningForm  ;Ïú»Ù´°¿Ú, µ±È»ÄãÒ²¿ÉÒÔ»»³ÉÈÃ´°¿Ú1Òş²Ø
-;SendMessage $hwndparent ${WM_CLOSE} 0 0  ;¹Ø±Õ
+ ${NSW_DestroyWindow} $WarningForm  ;é”€æ¯çª—å£, å½“ç„¶ä½ ä¹Ÿå¯ä»¥æ¢æˆè®©çª—å£1éšè—
+;SendMessage $hwndparent ${WM_CLOSE} 0 0  ;å…³é—­
 ;Abort
-  BringToFront                    ;½«Ö÷´°¿Ú¼¤»î
-  ${NSW_RestoreWindow} $hwndparent  ;»Ö¸´Ö÷´°¿Ú´óĞ¡
-  EnableWindow $hwndparent 1       ;ÆôÓÃÖ÷´°¿Ú
+  BringToFront                    ;å°†ä¸»çª—å£æ¿€æ´»
+  ${NSW_RestoreWindow} $hwndparent  ;æ¢å¤ä¸»çª—å£å¤§å°
+  EnableWindow $hwndparent 1       ;å¯ç”¨ä¸»çª—å£
   
   ;IntOp $STATE 1 - 1
-  ;SendMessage $hwndparent ${WM_CLOSE} 0 0  ;¹Ø±Õ
+  ;SendMessage $hwndparent ${WM_CLOSE} 0 0  ;å…³é—­
   ;StrCpy $STATE 0
   ;MessageBox MB_OK "${chushihua}"
   ;${NSD_SetText} ${chushihua} 0
@@ -102,7 +102,7 @@ Function onClickclos
   ;MessageBox MB_OK "${chushihua}"
   ;IntOp $STATE ${chushihua} !
   ;Call Messgesbox
-  SendMessage $hwndparent ${WM_CLOSE} 0 0  ;¹Ø±Õ
+  SendMessage $hwndparent ${WM_CLOSE} 0 0  ;å…³é—­
 FunctionEnd
 
 
