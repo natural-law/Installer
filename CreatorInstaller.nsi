@@ -7,7 +7,7 @@
 !AddPluginDir .\Unicode
 !endif
 
-Var MSG     ;MSG变量必须定义，而且在最前面，否则WndProc::onCallback不工作，插件中需要这个消息变量,用于记录消息信息
+Var MSG
 Var Dialog  ;Dialog变量也需要定义，他可能是NSIS默认的对话框变量用于保存窗体中控件的信息
 
 Var BGImage  ;背景小图
@@ -16,18 +16,18 @@ Var ImageHandle
 Var BGImageLong  ;背景大图
 Var ImageHandleLong
 
-Var AirBubblesImage ;安装进度条气泡提示图片
+Var AirBubblesImage
 Var AirBubblesHandle
 
 Var btn_Close ;关闭按钮
 Var btn_instetup ;立即安装按钮
-Var btn_ins ; 自定义安装按钮
+Var btn_ins
 Var btn_instend ;立即体验
 var cbk_license ;安装协议勾选框
-Var Txt_Xllicense ;安装协议超链接文本
-Var page1HNW ; 第一个页面句柄
-Var flag ;标志位 用来切换点击自定义按钮时布局的变化
-Var txb_AppFolder ;安装目录文本框
+Var Txt_Xllicense
+Var page1HNW
+Var flag
+Var txb_AppFolder
 Var AppFolder ;安装目录
 var btn_browse
 Var txt_FileSize ;所需空间大小Mb
@@ -35,7 +35,7 @@ Var txt_AvailableSpace ;可用空间Gb
 var txt_installDir ;安装目录
 Var PB_ProgressBar
 Var txt_installProgress ;安装进度文本
-var IsEnglish ;当前语言是否是英文
+var IsEnglish
 Var WarningForm
 Var txt_intallStatus
 
@@ -47,15 +47,14 @@ Var txt_intallStatus
 !define RESOURCE_IMG_PATH "$TEMP\${PRODUCT_NAME}"
 
 !define PEODUCT_DEFAULT_INST_PATH "$PROGRAMFILES\${PRODUCT_NAME}" ; 默认安装路径
-!define PRODUCT_INST_KEY "SOFTWARE\CocosCreator"  ; 注册表的 Key
-!define PRODUCT_INST_FOLDER_KEY "InstallPath" ; 注册表中记录安装路径的 Key
-!define PRODUCT_INST_VERSION_KEY "Version" ; 注册表中记录安装的版本 Key
+!define PRODUCT_INST_KEY "SOFTWARE\CocosCreator"  ;注册表的 Key
+!define PRODUCT_INST_FOLDER_KEY "InstallPath"
+!define PRODUCT_INST_VERSION_KEY "Version"
 !define PRODUCT_ENTRANCE "CocosCreator.exe"
 !define PRODUCT_UNINST_NAME "uninst.exe"
 
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
-;---------------------------设置软件压缩类型（也可以通过外面编译脚本控制）------------------------------------
 SetCompressor lzma
 SetCompress force
 SetOverwrite try
@@ -64,29 +63,22 @@ CRCCheck on
 ;应用程序显示名字
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 
-;应用程序输出文件名
 OutFile "${PRODUCT_NAME} ${PRODUCT_VERSION}.exe"
 
 InstallDir "${PEODUCT_DEFAULT_INST_PATH}"
 InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
-ShowInstDetails nevershow ;设置是否显示安装详细信息。
-ShowUnInstDetails nevershow ;设置是否显示删除详细信息。
+ShowInstDetails nevershow
+ShowUnInstDetails nevershow
 
-;MUI 预定义常量
-!define MUI_ABORTWARNING ;退出提示
+!define MUI_ABORTWARNING
 
-;!define MUI_CUSTOMFUNCTION_ABORT ABORT
-;MUI_CUSTOMFUNCTION_ABORT
-
-;安装图标的路径名字
 !define MUI_ICON "resources\icon\install.ico"
-;卸载图标的路径名字
 !define MUI_UNICON "resources\icon\uninstall.ico"
 ;使用的UI
 ;!define MUI_UI "resources\ui\mod.exe"
 
-;使用ReserveFile是加快安装包展开速度，具体请看帮助
-ReserveFile /r "resources/images/*.bmp"
+ReserveFile "resources\images\*.bmp"
+ReserveFile "resources\Skin\*.*"
 
 ; ;DLL
 ; ReserveFile `Plugins\nsDialogs.dll`
@@ -126,7 +118,6 @@ Page custom InstallFinish
 
 ; uninstaller
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.onGUIInit1
-; 自定义卸载界面 Custom UninstPage
 UninstPage custom un.UnPageWelcome
 ; 卸载反馈页面
 UninstPage custom un.FeedbackPage
