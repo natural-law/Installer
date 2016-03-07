@@ -582,19 +582,19 @@ Function onClickins
 
   StrCpy $R1 ""
 
-  ${NSD_GetText} $txb_AppFolder  $R0 ; get the install path
-  Push $R0
-  Call PathVerify
-  Pop $R1
-  ${If} $R0 == none
-  ${OrIf} $R0 == ""
-    StrCpy $R1 "error"
-  ${EndIf}
+  ; ${NSD_GetText} $txb_AppFolder  $R0 ; get the install path
+  ; Push $R0
+  ; Call PathVerify
+  ; Pop $R1
+  ; ${If} $R0 == none
+  ; ${OrIf} $R0 == ""
+  ;   StrCpy $R1 "error"
+  ; ${EndIf}
 
   ${If} $R1 == "error"
     MessageBox MB_OK $(MSG_IntallPathVerify)
   ${Else}
-     Call NextPage
+    Call NextPage
   ${EndIf}
 FunctionEnd
 
@@ -1306,7 +1306,7 @@ Function un.FeedbackPage
 FunctionEnd
 
 Function un.onGUICallback
-  ${If} $MSG = ${WM_LBUTTONDOWN}
+  ${If} $MSG == ${WM_LBUTTONDOWN}
     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
   ${EndIf}
 FunctionEnd
