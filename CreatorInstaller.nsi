@@ -6,6 +6,8 @@
 !AddPluginDir .\Unicode
 !endif
 
+RequestExecutionLevel admin
+
 Var MSG
 ; Var Dialog  ;Dialog变量也需要定义，他可能是NSIS默认的对话框变量用于保存窗体中控件的信息
 
@@ -988,8 +990,8 @@ Function un.onInit
 
   NSISVCLStyles::LoadVCLStyle  ${RESOURCE_IMG_PATH}\CocosCreator.vsf
 
-  ; SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1.bmp"
-  ; SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1_1.bmp"
+  SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1.bmp"
+  SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1_1.bmp"
 FunctionEnd
 
 Function un.onGUIInit1
@@ -1050,7 +1052,7 @@ Function un.UnPageWelcome
   SetCtlColors $0 ""  transparent ;set the background be transparent.
   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
 
-  ${NSD_CreateLabel} 20 11 100 30 $(un.MSG_CocosUninstaller)
+  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
   Pop $R1
   NSISVCLStyles::RemoveStyleControl $R1
   SetCtlColors $R1 A7BAF5 transparent
@@ -1146,7 +1148,7 @@ Function un.FeedbackPage
   ;SetCtlColors $0 ""  transparent ;set the background be transparent.
   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
 
-  ${NSD_CreateLabel} 20 11 100 30 $(un.MSG_CocosUninstaller)
+  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
   Pop $R1
   NSISVCLStyles::RemoveStyleControl $R1
   SetCtlColors $R1 A7BAF5 transparent
@@ -1285,8 +1287,8 @@ Function un.FeedbackPage
   ${NSD_CreateButton} 112 325 138 42 ""
   Pop $0
   NSISVCLStyles::RemoveStyleControl $0
-    SkinBtn::Set /IMGID=$(MSG_ImgBtnStartUninstall) $0
-  GetFunctionAddress $3 un.StarteUninstall
+  SkinBtn::Set /IMGID=$(MSG_ImgBtnStartUninstall) $0
+  GetFunctionAddress $3 un.StartUninstall
   SkinBtn::onClick $0 $3
 
   ; cancel button
@@ -1298,7 +1300,7 @@ Function un.FeedbackPage
   ; background
   ${NSD_CreateBitmap} 0 0 100% 100% ""
   Pop $BGImage
-  ${NSD_SetImage} $BGImage ${RESOURCE_IMG_PATH}\bg_fb.bmp $ImageHandle
+  ${NSD_SetImage} $BGImage ${RESOURCE_IMG_PATH}\unFeedbackBG.bmp $ImageHandle
   Call un.EnglishPage
   GetFunctionAddress $0 un.onGUICallback
   WndProc::onCallback $BGImage $0 ; handle the window moved
@@ -1373,7 +1375,7 @@ Function un.InstallFinish
   SetCtlColors $0 ""  transparent ; set the background be transparent.
   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page.
 
-  ${NSD_CreateLabel} 20 11 100 30 $(un.MSG_CocosUninstaller)
+  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
   Pop $R1
   NSISVCLStyles::RemoveStyleControl $R1
   SetCtlColors $R1 A7BAF5 transparent
@@ -1400,7 +1402,7 @@ Function un.InstallFinish
   nsDialogs::Show
 FunctionEnd
 
-Function un.StarteUninstall
+Function un.StartUninstall
   Call un.IsRunning
   Call un.NextPage
 FunctionEnd
