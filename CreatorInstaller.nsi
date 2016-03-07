@@ -1,7 +1,5 @@
 !addincludedir "include" ;添加插件目录
 
-Unicode true
-
 !ifndef NSIS_UNICODE
 !AddPluginDir .\plugins
 !else
@@ -45,7 +43,7 @@ Var txt_intallStatus
 !define PRODUCT_NAME "CocosCreator"
 !define PRODUCT_VERSION "1.0"
 !define PRODUCT_PUBLISHER "Cocos"
-!define RESOURCE_IMG_PATH "$TEMP\${PRODUCT_NAME}"
+!define RESOURCE_IMG_PATH "$PLUGINSDIR"
 
 !define PEODUCT_DEFAULT_INST_PATH "$PROGRAMFILES\${PRODUCT_NAME}" ; 默认安装路径
 !define PRODUCT_INST_KEY "SOFTWARE\CocosCreator"  ;注册表的 Key
@@ -635,8 +633,7 @@ Function PathVerify
   Pop $0 
   StrLen $1 $0
   StrCpy $2 ''
-  ; 每个中文会给strlen增加2，所以copy 1个字符时，会遇到不可显示字符，会被NSIS自动改成?
-  ; 正好?本身是非法路径，所以可以用这个来判断路径是否非法
+
   ${Do}
     IntOp $1 $1 - 1
     ${IfThen} $1 < 0 ${|}${ExitDo}${|}
@@ -911,40 +908,40 @@ Function InitiInstallPath
   ${NSD_SetText} $txt_AvailableSpace "$(MSG_AvailableSpace) $R0 GB"
 FunctionEnd
 
-;; Section MainSetup
-;;   Sleep 1000
-;;   SetDetailsPrint None ; not show anything
-;;   nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
-;;   Sleep 500 ;在安装程序里暂停执行 "休眠时间(单位为:ms)" 毫秒。"休眠时间(单位为:ms)" 可以是一个变量， 例如 "$0" 或一个数字，例如 "666"。
-;; 
-;;   SetOutPath $INSTDIR
-;;   SendMessage $PB_ProgressBar ${PBM_SETRANGE} 0 100
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 10 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 30 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 40 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 50 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 60 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 70 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 80 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 90 0
-;;   Sleep 1000
-;;   SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
-;;   nsisSlideshow::Stop
-;;   SetAutoClose true
-;; SectionEnd
-;; 
-;; Section -Post
-;;   WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}" ; generate the uninstaller
-;; SectionEnd
+Section MainSetup
+  Sleep 1000
+  SetDetailsPrint None ; not show anything
+  nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
+  Sleep 500 ;在安装程序里暂停执行 "休眠时间(单位为:ms)" 毫秒。"休眠时间(单位为:ms)" 可以是一个变量， 例如 "$0" 或一个数字，例如 "666"。
+
+  SetOutPath $INSTDIR
+  SendMessage $PB_ProgressBar ${PBM_SETRANGE} 0 100
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 10 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 30 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 40 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 50 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 60 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 70 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 80 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 90 0
+  Sleep 1000
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
+  nsisSlideshow::Stop
+  SetAutoClose true
+SectionEnd
+
+Section -Post
+  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}" ; generate the uninstaller
+SectionEnd
 
 ; uninstall related
 Var toolTipText
