@@ -279,13 +279,14 @@ Function Page.1
     ${CustomSetFont} $btn_browse $(un.MSG_FontName) 10 0
     ShowWindow $btn_browse ${SW_HIDE}
     
+    ; TODO calculate the space required dynamically
     ${NSD_CreateLabel} 100 472 180 25 $(MSG_FilesSize)
     Pop $txt_FileSize
     SetCtlColors $txt_FileSize 363636 FFFFFF
     ${CustomSetFont} $txt_FileSize $(un.MSG_FontName) 10 550
     ShowWindow $txt_FileSize ${SW_HIDE}
     
-    ${DriveSpace} $AppFolder "/D=F /S=G" $R0
+    ${DriveSpace} "$AppFolder" "/D=F /S=G" $R0
     
     ${NSD_CreateLabel} 280 472 200 25 "$(MSG_AvailableSpace) $R0 GB"
     Pop $txt_AvailableSpace
@@ -619,7 +620,7 @@ Function SelectAppFolder
     Pop $AppFolder
   ${EndIf}
   ${NSD_SetText} $txb_AppFolder $AppFolder
-  ${DriveSpace} $AppFolder "/D=F /S=G" $R0
+  ${DriveSpace} "$AppFolder" "/D=F /S=G" $R0
   ${NSD_SetText} $txt_AvailableSpace "$(MSG_AvailableSpace) $R0 GB"
 FunctionEnd
 
@@ -898,7 +899,7 @@ Function InitiInstallPath
     StrCpy $AppFolder $0
   ${EndIf}
 
-  ${DriveSpace} $AppFolder "/D=F /S=G" $R0
+  ${DriveSpace} "$AppFolder" "/D=F /S=G" $R0
   ${NSD_SetText} $txt_AvailableSpace "$(MSG_AvailableSpace) $R0 GB"
 FunctionEnd
 
@@ -1065,12 +1066,16 @@ Function un.UnPageWelcome
   Pop $btn_Close
   NSISVCLStyles::RemoveStyleControl $btn_Close
   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
+  GetFunctionAddress $1 un.FinishClick
+  SkinBtn::onClick $btn_Close $1
 
   ;minimize button
   ${NSD_CreateButton} 470 0 25 25 ""
   Pop $1
   NSISVCLStyles::RemoveStyleControl $1
   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
+  GetFunctionAddress $0 un.MinisizeWindows
+  SkinBtn::onClick $1 $0
 
   ; uninstall 
   ${NSD_CreateButton} 112 325 138 42 ""
@@ -1085,6 +1090,8 @@ Function un.UnPageWelcome
   Pop $0
   NSISVCLStyles::RemoveStyleControl $0
   SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel1) $0
+  GetFunctionAddress $1 un.FinishClick
+  SkinBtn::onClick $0 $1
 
   ;Set the image of background
   ${NSD_CreateBitmap} 0 0 100% 100% ""
@@ -1161,12 +1168,16 @@ Function un.FeedbackPage
   Pop $btn_Close
   NSISVCLStyles::RemoveStyleControl $btn_Close
   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
+  GetFunctionAddress $1 un.FinishClick
+  SkinBtn::onClick $btn_Close $1
 
   ;minimize button
   ${NSD_CreateButton} 470 0 25 25 ""
   Pop $1
   NSISVCLStyles::RemoveStyleControl $1
   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
+  GetFunctionAddress $0 un.MinisizeWindows
+  SkinBtn::onClick $1 $0
 
   ${NSD_CreateLabel} 50 46 300 20 $(un.MSG_LasterTitle)
   pop $0
@@ -1296,6 +1307,8 @@ Function un.FeedbackPage
   Pop $0
   NSISVCLStyles::RemoveStyleControl $0
   SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel) $0
+  GetFunctionAddress $1 un.FinishClick
+  SkinBtn::onClick $0 $1
 
   ; background
   ${NSD_CreateBitmap} 0 0 100% 100% ""
@@ -1384,7 +1397,7 @@ Function un.InstallFinish
   WndProc::onCallback $R1 $0
 
   ; finish button
-  ${NSD_CreateButton} 203 311 138 42 $(un.MSG_Finish)
+  ${NSD_CreateButton} 203 311 138 42 ""
   Pop $0
   NSISVCLStyles::RemoveStyleControl $0
   SkinBtn::Set /IMGID=$(MSG_ImgBtnFinish) $0
@@ -1434,6 +1447,11 @@ FunctionEnd
 
 Function un.FinishClick
 SendMessage $HWNDPARENT ${WM_CLOSE} 0 0
+FunctionEnd
+
+; minimize the window
+Function un.MinisizeWindows
+  ShowWindow $HWNDPARENT ${SW_MINIMIZE}
 FunctionEnd
 
 ; TODO Cocos Creator is running
