@@ -22,6 +22,7 @@
     ; strings
     LangString MSG_BowseText ${LANG_ENGLISH} "Brwose"
     LangString MSG_InstallDir ${LANG_ENGLISH} "Insatall Folder :"
+    LangString MSG_Tooltip ${LANG_ENGLISH} "Notification"
     LangString MSG_CheckLicense ${LANG_ENGLISH} "I have read and agree to the terms of"
     LangString MSG_License ${LANG_ENGLISH} "Cocos Creator License Agreement"
     LangString MSG_DirNotExist ${LANG_ENGLISH} "Create the installation directory failed."
@@ -75,6 +76,7 @@
     ; strings
     LangString MSG_BowseText ${LANG_SIMPCHINESE} "浏览"
     LangString MSG_InstallDir ${LANG_SIMPCHINESE} "安装目录 :"
+    LangString MSG_Tooltip ${LANG_SIMPCHINESE} "提示"
     LangString MSG_CheckLicense ${LANG_SIMPCHINESE} "已阅读并同意"
     LangString MSG_License ${LANG_SIMPCHINESE} "Cocos Creator 服务条款"
     LangString MSG_DirNotExist ${LANG_SIMPCHINESE} "安装目录创建失败!"

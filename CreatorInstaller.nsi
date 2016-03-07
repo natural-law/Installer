@@ -7,7 +7,7 @@
 !endif
 
 Var MSG
-Var Dialog  ;Dialog变量也需要定义，他可能是NSIS默认的对话框变量用于保存窗体中控件的信息
+; Var Dialog  ;Dialog变量也需要定义，他可能是NSIS默认的对话框变量用于保存窗体中控件的信息
 
 Var BGImage  ;背景小图
 Var ImageHandle
@@ -16,7 +16,6 @@ Var BGImageLong  ;背景大图
 Var ImageHandleLong
 
 Var AirBubblesImage
-Var AirBubblesHandle
 
 Var btn_Close ;close button 
 Var btn_instetup ;install now button按钮
@@ -33,7 +32,6 @@ Var txt_FileSize ;所需空间大小Mb
 Var txt_AvailableSpace ;可用空间Gb
 var txt_installDir ;安装目录
 Var PB_ProgressBar
-Var txt_installProgress ;安装进度文本
 var IsEnglish
 Var WarningForm
 Var txt_intallStatus
@@ -96,7 +94,7 @@ ReserveFile `plugins\nsResize.dll`
 !include "nsWindows.nsh"
 !include "LogicLib.nsh"
 !include "WinMessages.nsh"
-!include "LoadRTF.nsh"
+; !include "LoadRTF.nsh"
 !include "nsResize.nsh"
 !include "FileFunc.nsh"
 !include "nsDialogs_createTextMultiline.nsh"
@@ -458,10 +456,6 @@ Function NSD_TimerFun
     !endif
 FunctionEnd
 
-Var BANNER
-Var COUNT
-Var ARCHIVE
-
 Function InstallationMainFun
   SendMessage $PB_ProgressBar ${PBM_SETRANGE32} 0 100
 
@@ -576,12 +570,12 @@ Function InstallFinish
   ${NSD_FreeImage} $ImageHandle
 FunctionEnd
 
-Function ABORT
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_ICONSTOP $(MSG_QuitCocos) IDNO CANCEL
-  SendMessage $hwndparent ${WM_CLOSE} 0 0
-  CANCEL:
-  Abort
-FunctionEnd
+; Function ABORT
+;   MessageBox MB_ICONQUESTION|MB_YESNO|MB_ICONSTOP $(MSG_QuitCocos) IDNO CANCEL
+;   SendMessage $hwndparent ${WM_CLOSE} 0 0
+;   CANCEL:
+;   Abort
+; FunctionEnd
 
 Function onClickins
   Call IsRunning
@@ -609,10 +603,10 @@ Function IsRunning
   FindProcDLL::FindProc "Cocos.exe"
   Sleep 500
   Pop $R0
-  ${If} $R0 != 0
-    MessageBox MB_OK $(MSG_PleaseCloseCocos)
-    Abort
-  ${EndIf}
+  ; ${If} $R0 != 0
+  ;   MessageBox MB_OK $(MSG_PleaseCloseCocos)
+  ;   Abort
+  ; ${EndIf}
 FunctionEnd
 
 Function SelectAppFolder
@@ -942,7 +936,6 @@ Section -Post
 SectionEnd
 
 ; uninstall related
-Var toolTipText
 Var ck1
 Var ck1Text
 Var ck1Flag
@@ -1094,7 +1087,7 @@ Function un.UnPageWelcome
   ;Set the image of background
   ${NSD_CreateBitmap} 0 0 100% 100% ""
   Pop $BGImage
-  ${NSD_SetImage} $BGImage $(un.MSG_ImgUninstallBG) $ImageHandle
+  ${NSD_SetImage} $BGImage $(MSG_ImgUninstallBG) $ImageHandle
   
   GetFunctionAddress $0 un.onGUICallback
   WndProc::onCallback $BGImage $0 ; handle the window moved
@@ -1283,7 +1276,7 @@ Function un.FeedbackPage
     "${__NSD_Text_STYLE}||${ES_MULTILINE}|${ES_WANTRETURN}|${ES_AUTOVSCROLL}|${ES_AUTOHSCROLL}|${WS_BORDER}" \
     "${__NSD_Text_EXSTYLE}" \
     50 220 420 70 \
-    $(un.OtherReason)
+    $(un.MSG_OtherReason)
     Pop $otherText
   SetCtlColors $otherText b6d8fe 418BDB
   ${CustomSetFont} $otherText $(un.MSG_FontName) 10 500
@@ -1446,10 +1439,10 @@ Function un.IsRunning
   FindProcDLL::FindProc "Cocos.exe"
   Sleep 500
   Pop $R0
-  ${If} $R0 != 0
-    MessageBox MB_OK $(MSG_PleaseCloseCocos)
-    Abort
-  ${EndIf}
+  ; ${If} $R0 != 0
+  ;   MessageBox MB_OK $(MSG_PleaseCloseCocos)
+  ;   Abort
+  ; ${EndIf}
 FunctionEnd
 
 Function un.ck1Click
