@@ -73,8 +73,6 @@ ShowUnInstDetails nevershow
 
 !define MUI_ICON "resources\icon\install.ico"
 !define MUI_UNICON "resources\icon\uninstall.ico"
-;使用的UI
-;!define MUI_UI "resources\ui\mod.exe"
 
 ReserveFile "resources\images\*.bmp"
 ReserveFile "resources\Skin\*.*"
@@ -153,12 +151,12 @@ Function .onInit
     SetOutPath "${RESOURCE_IMG_PATH}"
     File /r "resources\images\*.bmp"
 
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_strongbtn.bmp"
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_Close.bmp"
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_custom.bmp"
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_install.bmp"
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_express.bmp"
-    ; SkinBtn::Init "${RESOURCE_IMG_PATH}\browse.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_strongbtn.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_Close.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_custom.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_install.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\btn_express.bmp"
+    SkinBtn::Init "${RESOURCE_IMG_PATH}\browse.bmp"
 
     Call InitiInstallPath
 FunctionEnd
@@ -304,7 +302,7 @@ Function Page.1
     ${NSD_Check} $cbk_license
     ${NSD_OnClick} $cbk_license Chklicense
     
-    ${NSD_CreateLink} 124 435 100 16 $(MSG_License)
+    ${NSD_CreateLink} 124 435 180 16 $(MSG_License)
     Pop $Txt_Xllicense
     SetCtlColors $Txt_Xllicense 0074F3 FFFFFF
     ${NSD_OnClick} $Txt_Xllicense xllicense
@@ -746,13 +744,13 @@ Function onCustomClick
     ShowWindow $txt_AvailableSpace ${SW_HIDE}
     nsResize::Set $btn_ins 480 435 87 14
     nsResize::Set $cbk_license 20 432 100 20
-    nsResize::Set $Txt_Xllicense 124 435 100 16
+    nsResize::Set $Txt_Xllicense 124 435 180 16
     SkinBtn::Set /IMGID=$(MSG_ImgBtnCustomDown) $btn_ins
     Call EnglishPageSmall
     Push "False"
     Pop $flag
   ${Else}
-    ${ChangeWindowSize} 600 665
+    ${ChangeWindowSize} 600 520
     ShowWindow $BGImage ${SW_HIDE}
     ShowWindow $BGImageLong ${SW_SHOW}
     
@@ -761,9 +759,9 @@ Function onCustomClick
     ShowWindow $btn_browse ${SW_SHOW}
     ShowWindow $txt_FileSize ${SW_SHOW}
     ShowWindow $txt_AvailableSpace ${SW_SHOW}
-    nsResize::Set $btn_ins 480 635 87 14
-    nsResize::Set $cbk_license 20 635 100 20
-    nsResize::Set $Txt_Xllicense 124 640 100 16
+    nsResize::Set $btn_ins 480 500 87 14
+    nsResize::Set $cbk_license 20 500 100 20
+    nsResize::Set $Txt_Xllicense 124 505 180 16
     SkinBtn::Set /IMGID=$(MSG_ImgBtnCustomUp) $btn_ins
     call EnglishPageExpand
     Push "True"
