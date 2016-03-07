@@ -96,7 +96,7 @@ ReserveFile `plugins\nsResize.dll`
 !include "nsWindows.nsh"
 !include "LogicLib.nsh"
 !include "WinMessages.nsh"
-; !include "LoadRTF.nsh"
+!include "TextLog.nsh"
 !include "nsResize.nsh"
 !include "FileFunc.nsh"
 !include "nsDialogs_createTextMultiline.nsh"
@@ -137,6 +137,9 @@ Uninstpage custom un.InstallFinish
 !define FileTypeReg `!insertmacro __FileTypeReg`
 
 Function .onInit
+    ${LogSetFileName} "C:\Users\bill\Desktop\MyInstallLog.txt"
+    ${LogSetOff}
+
     ; 获取语言
     ${If} $LANGUAGE == 1033
       Push True
@@ -338,8 +341,8 @@ Function Page.1leave
   ClearErrors
   CreateDirectory "$R0"
   IfErrors 0 +3
-  MessageBox MB_ICONINFORMATION|MB_OK "'$R0' $(MSG_DirNotExist)"
-  Return
+    MessageBox MB_ICONINFORMATION|MB_OK "'$R0' $(MSG_DirNotExist)"
+    Abort
   StrCpy $INSTDIR  $R0
 FunctionEnd
 
