@@ -68,7 +68,7 @@
     LangString MSG_ImgBtnNotInstall ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\notInstall_zh.bmp"
     LangString MSG_ImgBtnOpenFolder ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\openFolder_zh.bmp"
     LangString MSG_ImgBtnUninstall ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\uninstall_zh.bmp"
-    LangString MSG_ImgBtnStartUninstall ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\startUnistall_zh.bmp"
+    LangString MSG_ImgBtnStartUninstall ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\startUninstall_zh.bmp"
     LangString MSG_ImgUninstallBG ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\uninstallBG_zh.bmp"
     LangString MSG_ImgUnFinishBG ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\unPageFinishBG_zh.bmp"
     LangString MSG_ImgBtnYes ${LANG_SIMPCHINESE} "${RESOURCE_IMG_PATH}\yes_zh.bmp"
