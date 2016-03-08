@@ -100,7 +100,6 @@ ReserveFile `plugins\nsResize.dll`
 !include "nsResize.nsh"
 !include "FileFunc.nsh"
 !include "nsDialogs_createTextMultiline.nsh"
-!include "LogicLib.nsh"
 !include "GetProcessInfo.nsh"
 
 ; installer
@@ -108,7 +107,7 @@ ReserveFile `plugins\nsResize.dll`
 ; 安装选项页面
 Page custom  Page.1 Page.1leave
 ; 安装过程页面
-Page custom InstFilesPageShow InstallFilesFinish
+Page custom InstFilesPageShow
 ; 安装完成页面
 Page custom InstallFinish
 
@@ -369,6 +368,10 @@ Function EnglishPageExpand
   ${EndIf}
 FunctionEnd
 
+Var curStep
+Var curProgress
+; Var stepMax
+; Var stepMin
 Function InstFilesPageShow
     GetDlgItem $0 $HWNDPARENT 1
     ShowWindow $0 ${SW_HIDE}
@@ -420,8 +423,11 @@ Function InstFilesPageShow
     Pop $BGImage
     ${NSD_SetImage} $BGImage $(MSG_ImgInstallBG) $ImageHandle
 
+    SendMessage $PB_ProgressBar ${PBM_SETRANGE32} 0 100
+    StrCpy $curProgress "0"
+    StrCpy $curStep "0"
     GetFunctionAddress $0 AirBubblesPosition
-    nsDialogs::CreateTimer $0 1000
+    nsDialogs::CreateTimer $0 250
     
     GetFunctionAddress $0 NSD_TimerFun
     nsDialogs::CreateTimer $0 1
@@ -432,23 +438,57 @@ Function InstFilesPageShow
     ${NSD_FreeImage} $ImageHandle
 FunctionEnd
 
-; install finished
-Function InstallFilesFinish
-FunctionEnd
-
-Var proPosition
 Function AirBubblesPosition
-  SendMessage $PB_ProgressBar ${PBM_GETPOS} 0 0 $0
-  IntOp $1 $0 + 1
-  ${IF} $proPosition < 95
-    SendMessage $PB_ProgressBar ${PBM_SETPOS} $1 0
-    IntOp $proPosition $0 + 0
-    ${NSD_SetText} $AirBubblesImage "$0%"
-    IntOp $0 $0 * 46
-    IntOp $0 $0 / 10
-    IntOp $0 $0 + 48
-    nsResize::Set $AirBubblesImage $0 345 45 31
+  ; ${If} $curStep == "0"
+  ;   ; install not begin, do nothing
+  ;   StrCpy $stepMax "0"
+  ;   StrCpy $stepMin "0"
+  ; ${ElseIf} $curStep == "1"  ; uninstalling the old version
+  ;   ${NSD_SetText} $txt_intallStatus "$(MSG_UninstOld)"
+  ;   StrCpy $stepMax "20"
+  ;   StrCpy $stepMin "0"
+  ; ${ElseIf} $curStep == "2"  ; install files
+  ;   ${NSD_SetText} $txt_intallStatus "$(MSG_Installing)"
+  ;   StrCpy $stepMax "70"
+  ;   StrCpy $stepMin "21"
+  ; ${ElseIf} $curStep == "3"  ; write registry
+  ;   ${NSD_SetText} $txt_intallStatus "$(MSG_WriteRegs)"
+  ;   StrCpy $stepMax "90"
+  ;   StrCpy $stepMin "71"
+  ; ${ElseIf} $curStep == "4"  ; create shortcuts
+  ;   ${NSD_SetText} $txt_intallStatus "$(MSG_Shortcut)"
+  ;   StrCpy $stepMax "100"
+  ;   StrCpy $stepMin "91"
+  ; ${ElseIf} $curStep == "5"  ; install end
+  ;   StrCpy $stepMax "100"
+  ;   StrCpy $stepMin "100"
+  ; ${Else}
+  ;   StrCpy $stepMax "0"
+  ;   StrCpy $stepMin "0"
+  ; ${EndIf}
+  ; 
+  ; IntOp $curProgress $curProgress + 0
+  ; IntOp $stepMax $stepMax + 0
+  ; IntOp $stepMin $stepMin + 0
+  ; 
+  ; ${If} $curProgress < $stepMin
+  ;   IntOp $curProgress $stepMin + 0
+  ; ${ElseIf} $curProgress < $stepMax
+  ;   IntOp $curProgress $curProgress + 1
+  ; ${EndIf}
+
+  SendMessage $PB_ProgressBar ${PBM_GETPOS} 0 0 $curProgress
+  IntOp $curProgress $curProgress + 0
+  ${If} $curProgress < 100
+    IntOp $curProgress $curProgress + 1
   ${EndIf}
+
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} $curProgress 0
+  ${NSD_SetText} $AirBubblesImage "$curProgress%"
+  IntOp $0 $curProgress * 460
+  IntOp $0 $0 / 100
+  IntOp $0 $0 + 50
+  nsResize::Set $AirBubblesImage $0 345 45 31
 FunctionEnd
 
 Function NSD_TimerFun
@@ -463,13 +503,16 @@ Function NSD_TimerFun
 FunctionEnd
 
 Function InstallationMainFun
-  SendMessage $PB_ProgressBar ${PBM_SETRANGE32} 0 100
+  ${LogText} "----- InstallationMainFun begin -----"
+  ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
+  ${LogText} "----- begin time : $4:$5:$6 -----"
 
   ##################### uninstall the old version #####################
   ReadRegStr $0 HKLM "${PRODUCT_INST_KEY}" "${PRODUCT_INST_FOLDER_KEY}"
   StrCpy $1 "$0\${PRODUCT_UNINST_NAME}"
-  IfFileExists "$1" 0 +4
+  IfFileExists "$1" 0 +5
   ${NSD_SetText} $txt_intallStatus "$(MSG_UninstOld)"
+  StrCpy $curStep "1"
   ExecWait '"$1" /S _?=$0'
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
   ####################################################
@@ -478,24 +521,29 @@ Function InstallationMainFun
 
   ; install files
   ${NSD_SetText} $txt_intallStatus "$(MSG_Installing)"
+  StrCpy $curStep "2"
   SetOutPath "$INSTDIR"
   File /r "CocosCreator\*.*"
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 70 0
-  call AirBubblesPosition
+  SendMessage $PB_ProgressBar ${PBM_SETPOS} 80 0
 
   ; write registry
   ${NSD_SetText} $txt_intallStatus "$(MSG_WriteRegs)"
+  StrCpy $curStep "3"
   Call WriterRegistry
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 90 0
-  call AirBubblesPosition
 
   ; create shortcuts
   ${NSD_SetText} $txt_intallStatus "$(MSG_Shortcut)"
+  StrCpy $curStep "4"
   Call CreateShortcut
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
-  call AirBubblesPosition
+  StrCpy $curStep "5"
 
-  Sleep 1000
+  ${LogText} "----- InstallationMainFun end -----"
+  ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
+  ${LogText} "----- end time : $4:$5:$6 -----"
+
+  Sleep 500
   Call NextPage
 FunctionEnd
 
@@ -907,38 +955,6 @@ Function InitiInstallPath
 FunctionEnd
 
 Section MainSetup
-  Sleep 1000
-  SetDetailsPrint None ; not show anything
-  nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
-  Sleep 500 ;在安装程序里暂停执行 "休眠时间(单位为:ms)" 毫秒。"休眠时间(单位为:ms)" 可以是一个变量， 例如 "$0" 或一个数字，例如 "666"。
-
-  SetOutPath $INSTDIR
-  SendMessage $PB_ProgressBar ${PBM_SETRANGE} 0 100
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 10 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 30 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 40 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 50 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 60 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 70 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 80 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 90 0
-  Sleep 1000
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
-  nsisSlideshow::Stop
-  SetAutoClose true
-SectionEnd
-
-Section -Post
-  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}" ; generate the uninstaller
 SectionEnd
 
 ; uninstall related
