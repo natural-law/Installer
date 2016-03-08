@@ -111,6 +111,8 @@ Page custom InstFilesPageShow
 ; 安装完成页面
 Page custom InstallFinish
 
+!insertmacro MUI_PAGE_INSTFILES
+
 ; uninstaller
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.onGUIInit1
 UninstPage custom un.UnPageWelcome
@@ -513,11 +515,9 @@ Function InstallationMainFun
   IfFileExists "$1" 0 +5
   ${NSD_SetText} $txt_intallStatus "$(MSG_UninstOld)"
   StrCpy $curStep "1"
-  ExecWait '"$1" /S _?=$0'
+  ExecWait '"$1" /S'
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
   ####################################################
-
-  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}"
 
   ; install files
   ${NSD_SetText} $txt_intallStatus "$(MSG_Installing)"
@@ -538,6 +538,9 @@ Function InstallationMainFun
   Call CreateShortcut
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
   StrCpy $curStep "5"
+
+  ; create uninstaller
+  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}"
 
   ${LogText} "----- InstallationMainFun end -----"
   ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
@@ -832,7 +835,7 @@ FunctionEnd
 
 ; create shortcuts
 Function CreateShortcut
-  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_ENTRANCE}" "" "$INSTDIR\${PRODUCT_ENTRANCE}" 0 SW_SHOWNORMAL "" "${PRODUCT_NAME}"
+  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_ENTRANCE}"
 FunctionEnd
 
 ;open the install folder
@@ -955,6 +958,7 @@ Function InitiInstallPath
 FunctionEnd
 
 Section MainSetup
+  Call InstallationMainFun
 SectionEnd
 
 ; uninstall related
@@ -1430,7 +1434,6 @@ Function un.InstallFinish
 
   GetFunctionAddress $0 un.onGUICallback
   WndProc::onCallback $BGImage $0 ; handle the window moved
-  WndProc::onCallback $BGImageLong $0 ; handle the window moved
   nsDialogs::Show
 FunctionEnd
 
@@ -1450,18 +1453,23 @@ Function un.NextPage
 FunctionEnd
 
 Function un.NSD_TimerFun
-    GetFunctionAddress $0 un.NSD_TimerFun
-    nsDialogs::KillTimer $0
-    !if 1   ; whether running in background, 1 is true.
-        GetFunctionAddress $0 un.InstallationMainFun
-        BgWorker::CallAndWait
-    !else
-        Call un.InstallationMainFun
-    !endif
+  GetFunctionAddress $0 un.NSD_TimerFun
+  nsDialogs::KillTimer $0
+  !if 1   ; whether running in background, 1 is true.
+      GetFunctionAddress $0 un.InstallationMainFun
+      BgWorker::CallAndWait
+  !else
+      Call un.InstallationMainFun
+  !endif
 FunctionEnd
 
 Function un.InstallationMainFun
+  Call un.DeleteReg
 
+  Delete "$INSTDIR\${PRODUCT_UNINST_NAME}"
+  RMDir /r /REBOOTOK "$INSTDIR"
+
+  Call un.NextPage
 FunctionEnd
 
 Function un.FinishClick
@@ -1634,9 +1642,5 @@ Function un.DeleteReg
 FunctionEnd
 
 Section Uninstall
-  Call un.DeleteReg
-
-  Delete "$INSTDIR\${PRODUCT_UNINST_NAME}"
-  RMDir /r /REBOOTOK "$INSTDIR"
-  Call un.NextPage
+  Call un.InstallationMainFun
 SectionEnd
