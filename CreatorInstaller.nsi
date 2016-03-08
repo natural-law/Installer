@@ -107,7 +107,7 @@ ReserveFile `plugins\nsResize.dll`
 ; 安装选项页面
 Page custom  Page.1 Page.1leave
 ; 安装过程页面
-Page custom InstFilesPageShow
+Page custom InstFilesPageShow InstallFilesFinish
 ; 安装完成页面
 Page custom InstallFinish
 
@@ -440,6 +440,12 @@ Function InstFilesPageShow
     ${NSD_FreeImage} $ImageHandle
 FunctionEnd
 
+; install finished
+Function InstallFilesFinish
+  ; create uninstaller
+  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}"
+FunctionEnd
+
 Function AirBubblesPosition
   ; ${If} $curStep == "0"
   ;   ; install not begin, do nothing
@@ -538,9 +544,6 @@ Function InstallationMainFun
   Call CreateShortcut
   SendMessage $PB_ProgressBar ${PBM_SETPOS} 100 0
   StrCpy $curStep "5"
-
-  ; create uninstaller
-  WriteUninstaller "$INSTDIR\${PRODUCT_UNINST_NAME}"
 
   ${LogText} "----- InstallationMainFun end -----"
   ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
@@ -959,6 +962,7 @@ FunctionEnd
 
 Section MainSetup
   Call InstallationMainFun
+  Call InstallFilesFinish
 SectionEnd
 
 ; uninstall related
