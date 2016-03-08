@@ -1371,21 +1371,18 @@ Function un.InstallFiles1
 
   GetDlgItem $R0 $R2 1004  ; set the progress bar position
   System::Call "user32::MoveWindow(i R0, i 16, i 325, i 481, i 18) i r2"
+  SkinProgress::Set $R0 "${RESOURCE_IMG_PATH}\progress.bmp" "${RESOURCE_IMG_PATH}\progressBG.bmp"
 
   GetDlgItem $R1 $R2 1006  ; set the label.
   NSISVCLStyles::RemoveStyleControl $R1
   SetCtlColors $R1 ""  FFFFFF ; color with F6F6F6, Cannot set the background transparent
   System::Call "user32::MoveWindow(i R1, i 16, i 350, i 481, i 12) i r2"
+  ${NSD_SetText} $R1 $(un.MSG_CocosUninstaller)
 
   FindWindow $R2 "#32770" "" $HWNDPARENT  ; set the image
   GetDlgItem $R0 $R2 1995
   System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
-  ${NSD_SetImage} $R0 ${RESOURCE_IMG_PATH}\bg.bmp $ImageHandle
-
-  ; set the image of progressbar
-  FindWindow $R2 "#32770" "" $HWNDPARENT
-  GetDlgItem $5 $R2 1004
-  ;SkinProgress::Set $5 "${RESOURCE_IMG_PATH}\progress.bmp" "${RESOURCE_IMG_PATH}\progressBG.bmp"
+  ${NSD_SetImage} $R0 $(MSG_ImgUnFinishBG) $ImageHandle
 FunctionEnd
 
 Function un.InstallFinish
