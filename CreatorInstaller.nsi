@@ -102,6 +102,8 @@ ReserveFile `plugins\nsResize.dll`
 !include "nsDialogs_createTextMultiline.nsh"
 !include "GetProcessInfo.nsh"
 
+BrandingText "${PRODUCT_PUBLISHER}"
+
 ; installer
 !define MUI_CUSTOMFUNCTION_GUIINIT onGUIInit
 ; 安装选项页面
@@ -114,15 +116,20 @@ Page custom InstallFinish
 !insertmacro MUI_PAGE_INSTFILES
 
 ; uninstaller
-!define MUI_CUSTOMFUNCTION_UNGUIINIT un.onGUIInit1
-UninstPage custom un.UnPageWelcome
-; 卸载反馈页面
-UninstPage custom un.FeedbackPage
-; 卸载过程界面
-!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.InstallFiles1
+!define MUI_PAGE_HEADER_TEXT "$(un.MSG_CocosUninstaller)"
+!insertmacro MUI_UNPAGE_CONFIRM
+!define MUI_PAGE_HEADER_TEXT "$(un.MSG_CocosUninstaller)"
 !insertmacro MUI_UNPAGE_INSTFILES
-; 卸载完成界面
-Uninstpage custom un.InstallFinish
+
+; !define MUI_CUSTOMFUNCTION_UNGUIINIT un.onGUIInit1
+; UninstPage custom un.UnPageWelcome
+; ; 卸载反馈页面
+; UninstPage custom un.FeedbackPage
+; ; 卸载过程界面
+; !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.InstallFiles1
+; !insertmacro MUI_UNPAGE_INSTFILES
+; ; 卸载完成界面
+; Uninstpage custom un.InstallFinish
 
 ; 安装界面包含的语言设置
 !insertmacro MUI_LANGUAGE "English"
@@ -515,15 +522,15 @@ Function InstallationMainFun
   ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
   ${LogText} "----- begin time : $4:$5:$6 -----"
 
-  ##################### uninstall the old version #####################
-  ReadRegStr $0 HKLM "${PRODUCT_INST_KEY}" "${PRODUCT_INST_FOLDER_KEY}"
-  StrCpy $1 "$0\${PRODUCT_UNINST_NAME}"
-  IfFileExists "$1" 0 +5
-  ${NSD_SetText} $txt_intallStatus "$(MSG_UninstOld)"
-  StrCpy $curStep "1"
-  ExecWait '"$1" /S'
-  SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
-  ####################################################
+;  ##################### uninstall the old version #####################
+;  ReadRegStr $0 HKLM "${PRODUCT_INST_KEY}" "${PRODUCT_INST_FOLDER_KEY}"
+;  StrCpy $1 "$0\${PRODUCT_UNINST_NAME}"
+;  IfFileExists "$1" 0 +5
+;  ${NSD_SetText} $txt_intallStatus "$(MSG_UninstOld)"
+;  StrCpy $curStep "1"
+;  ExecWait '"$1" /S'
+;  SendMessage $PB_ProgressBar ${PBM_SETPOS} 20 0
+;  ####################################################
 
   ; install files
   ${NSD_SetText} $txt_intallStatus "$(MSG_Installing)"
@@ -965,673 +972,673 @@ Section MainSetup
   Call InstallFilesFinish
 SectionEnd
 
-; uninstall related
-Var ck1
-Var ck1Text
-Var ck1Flag
-
-Var ck2
-Var ck2Text
-Var ck2Flag
-
-Var ck3
-Var ck3Text
-Var ck3Flag
-
-Var ck4
-Var ck4Text
-Var ck4Flag
-
-Var ck5
-Var ck5Text
-Var ck5Flag
-
-Var ck6
-Var ck6Text
-Var ck6Flag
-
-Var ck7
-Var ck7Text
-Var ck7Flag
-
-Var ck8
-Var ck8Text
-Var ck8Flag
-
-Var otherText
-
-Function un.onInit
-  ${If} $LANGUAGE == 1033
-    Push True
-    Pop $IsEnglish
-  ${Else}
-    Push False
-    Pop $IsEnglish
-  ${EndIf}
-
-  InitPluginsDir
-
-  ; unzip the resources files
-  SetOutPath "${RESOURCE_IMG_PATH}"
-  File /r "resources\images\*.bmp"
-  File "resources\Skin\CocosCreator.vsf"
-
-  NSISVCLStyles::LoadVCLStyle  ${RESOURCE_IMG_PATH}\CocosCreator.vsf
-
-  SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1.bmp"
-  SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1_1.bmp"
-FunctionEnd
-
-Function un.onGUIInit1
-  System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
-
-  ; hide some widgets
-  GetDlgItem $0 $HWNDPARENT 1034
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1035
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1036
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1037
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1038
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1039
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1256
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1028
-  ShowWindow $0 ${SW_HIDE}
-
-  ${NSW_SetWindowSize} $HWNDPARENT 520 400 ; change the size of window
-  System::Call User32::GetDesktopWindow()i.R0
-  ;圆角
-  System::Alloc 16
-  System::Call user32::GetWindowRect(i$HWNDPARENT,isR0)
-  System::Call *$R0(i.R1,i.R2,i.R3,i.R4)
-  IntOp $R3 $R3 - $R1
-  IntOp $R4 $R4 - $R2
-  System::Call gdi32::CreateRoundRectRgn(i0,i0,iR3,iR4,i4,i4)i.r0
-  System::Call user32::SetWindowRgn(i$HWNDPARENT,ir0,i1)
-  System::Free $R0
-FunctionEnd
-
-; uninstall welcome page
-Function un.UnPageWelcome
-  GetDlgItem $0 $HWNDPARENT 1 ; Next/Close button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 2 ; cancel button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 3 ; Pre button
-  ShowWindow $0 ${SW_HIDE}
-
-  GetDlgItem $0 $HWNDPARENT 1990
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1991
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1992
-  ShowWindow $0 ${SW_HIDE}
-  
-  nsDialogs::Create /NOUNLOAD 1044
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-  SetCtlColors $0 ""  transparent ;set the background be transparent.
-  ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
-
-  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
-  Pop $R1
-  NSISVCLStyles::RemoveStyleControl $R1
-  SetCtlColors $R1 A7BAF5 transparent
-  ${CustomSetFont} $R1 $(un.MSG_FontName) 16 400
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $R1 $0
-
-  ;close button 
-  ${NSD_CreateButton} 495 0 25 25 ""
-  Pop $btn_Close
-  NSISVCLStyles::RemoveStyleControl $btn_Close
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
-  GetFunctionAddress $1 un.FinishClick
-  SkinBtn::onClick $btn_Close $1
-
-  ;minimize button
-  ${NSD_CreateButton} 470 0 25 25 ""
-  Pop $1
-  NSISVCLStyles::RemoveStyleControl $1
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
-  GetFunctionAddress $0 un.MinisizeWindows
-  SkinBtn::onClick $1 $0
-
-  ; uninstall 
-  ${NSD_CreateButton} 112 325 138 42 ""
-  Pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SkinBtn::Set /IMGID=$(MSG_ImgBtnUninstall) $0
-  GetFunctionAddress $3 un.NextPage
-  SkinBtn::onClick $0 $3
-
-  ; cancel uninstall
-  ${NSD_CreateButton} 282 325 138 42 ""
-  Pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel1) $0
-  GetFunctionAddress $1 un.FinishClick
-  SkinBtn::onClick $0 $1
-
-  ;Set the image of background
-  ${NSD_CreateBitmap} 0 0 100% 100% ""
-  Pop $BGImage
-  ${NSD_SetImage} $BGImage $(MSG_ImgUninstallBG) $ImageHandle
-  
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $BGImage $0 ; handle the window moved
-  nsDialogs::Show
-FunctionEnd
-
-Function un.EnglishPage
-  ${If} $IsEnglish == True
-    nsResize::Set $ck1 50 92 16 16
-    nsResize::Set $ck1Text 76 90 180 30
-  
-    nsResize::Set $ck2 270 92 16 16
-    nsResize::Set $ck2Text 296 90 180 30
-
-    nsResize::Set $ck3 50 122 16 16
-    nsResize::Set $ck3Text 76 120 180 30
-
-    nsResize::Set $ck4 270 122 16 16
-    nsResize::Set $ck4Text 296 120 180 30
-
-    nsResize::Set $ck5 50 154 16 16
-    nsResize::Set $ck5Text 76 152 180 30
-
-    nsResize::Set $ck6 270 154 16 16
-    nsResize::Set $ck6Text 296 152 180 30
-
-    nsResize::Set $ck7 50 187 16 16
-    nsResize::Set $ck7Text 76 185 180 30
-  
-    nsResize::Set $ck8 270 187 16 16
-    nsResize::Set $ck8Text 296 185 180 30
-  ${EndIf}
-FunctionEnd
-
-Function un.FeedbackPage
-  GetDlgItem $0 $HWNDPARENT 1 ; next/close button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 2 ; cancel button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 3 ; pre button
-  ShowWindow $0 ${SW_HIDE}
-
-  GetDlgItem $0 $HWNDPARENT 1990
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1991
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1992
-  ShowWindow $0 ${SW_HIDE}
- 
-  nsDialogs::Create /NOUNLOAD 1044
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-
-  ;SetCtlColors $0 ""  transparent ;set the background be transparent.
-  ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
-
-  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
-  Pop $R1
-  NSISVCLStyles::RemoveStyleControl $R1
-  SetCtlColors $R1 A7BAF5 transparent
-  ${CustomSetFont} $R1 $(un.MSG_FontName) 10 700
-  ;GetFunctionAddress $0 un.onGUICallback
-  ;WndProc::onCallback $R1 $0
-  
-  ;close button 
-  ${NSD_CreateButton} 495 0 25 25 ""
-  Pop $btn_Close
-  NSISVCLStyles::RemoveStyleControl $btn_Close
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
-  GetFunctionAddress $1 un.FinishClick
-  SkinBtn::onClick $btn_Close $1
-
-  ;minimize button
-  ${NSD_CreateButton} 470 0 25 25 ""
-  Pop $1
-  NSISVCLStyles::RemoveStyleControl $1
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
-  GetFunctionAddress $0 un.MinisizeWindows
-  SkinBtn::onClick $1 $0
-
-  ${NSD_CreateLabel} 50 46 300 20 $(un.MSG_LasterTitle)
-  pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SetCtlColors $0 fffffff transparent
-  ${CustomSetFont} $0 $(un.MSG_FontName) 10 700
-  
-  ;feedback options begin --------------------------------------------------------------
-  ${NSD_CreateButton} 50 92 16 16 ""
-  Pop $ck1
-  NSISVCLStyles::RemoveStyleControl $ck1
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck1
-  GetFunctionAddress $2 un.ck1Click
-  SkinBtn::onClick $ck1 $2
-  ${NSD_CreateLabel} 76 90 124 20 $(un.MSG_Reason1)
-  pop $ck1Text
-  NSISVCLStyles::RemoveStyleControl $ck1Text
-  SetCtlColors $ck1Text 98c8fe transparent
-  ${CustomSetFont} $ck1Text $(un.MSG_FontName) 10 700
-  ;GetFunctionAddress $0 un.MouseDown
-  ;WndProc::onCallback $ck1Text $0
-  
-  ${NSD_CreateButton} 270 92 16 16 ""
-  Pop $ck2
-  NSISVCLStyles::RemoveStyleControl $ck2
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck2
-  GetFunctionAddress $2 un.ck2Click
-  SkinBtn::onClick $ck2 $2
-  ${NSD_CreateLabel} 296 90 130 20 $(un.MSG_Reason2)
-  pop $ck2Text
-  NSISVCLStyles::RemoveStyleControl $ck2Text
-  SetCtlColors $ck2Text 98c8fe transparent
-  ${CustomSetFont} $ck2Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 50 122 16 16 ""
-  Pop $ck3
-  NSISVCLStyles::RemoveStyleControl $ck3
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck3
-  GetFunctionAddress $2 un.ck3Click
-  SkinBtn::onClick $ck3 $2
-  ${NSD_CreateLabel} 76 120 130 20 $(un.MSG_Reason3)
-  pop $ck3Text
-  NSISVCLStyles::RemoveStyleControl $ck3Text
-  SetCtlColors $ck3Text 98c8fe transparent
-  ${CustomSetFont} $ck3Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 270 122 16 16 ""
-  Pop $ck4
-  NSISVCLStyles::RemoveStyleControl $ck4
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck4
-  GetFunctionAddress $2 un.ck4Click
-  SkinBtn::onClick $ck4 $2
-  ${NSD_CreateLabel} 296 120 130 20 $(un.MSG_Reason4)
-  pop $ck4Text
-  NSISVCLStyles::RemoveStyleControl $ck4Text
-  SetCtlColors $ck4Text 98c8fe transparent
-  ${CustomSetFont} $ck4Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 50 154 16 16 ""
-  Pop $ck5
-  NSISVCLStyles::RemoveStyleControl $ck5
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck5
-  GetFunctionAddress $2 un.ck5Click
-  SkinBtn::onClick $ck5 $2
-  ${NSD_CreateLabel} 76 152 130 20 $(un.MSG_Reason5)
-  pop $ck5Text
-  NSISVCLStyles::RemoveStyleControl $ck5Text
-  SetCtlColors $ck5Text 98c8fe transparent
-  ${CustomSetFont} $ck5Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 270 154 16 16 ""
-  Pop $ck6
-  NSISVCLStyles::RemoveStyleControl $ck6
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck6
-  GetFunctionAddress $2 un.ck6Click
-  SkinBtn::onClick $ck6 $2
-  ${NSD_CreateLabel} 296 152 130 20 $(un.MSG_Reason6)
-  pop $ck6Text
-  NSISVCLStyles::RemoveStyleControl $ck6Text
-  SetCtlColors $ck6Text 98c8fe transparent
-  ${CustomSetFont} $ck6Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 50 187 16 16 ""
-  Pop $ck7
-  NSISVCLStyles::RemoveStyleControl $ck7
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck7
-  GetFunctionAddress $2 un.ck7Click
-  SkinBtn::onClick $ck7 $2
-  ${NSD_CreateLabel} 76 185 130 20 $(un.MSG_Reason7)
-  pop $ck7Text
-  NSISVCLStyles::RemoveStyleControl $ck7Text
-  SetCtlColors $ck7Text 98c8fe transparent
-  ${CustomSetFont} $ck7Text $(un.MSG_FontName) 10 700
-
-  ${NSD_CreateButton} 270 187 16 16 ""
-  Pop $ck8
-  NSISVCLStyles::RemoveStyleControl $ck8
-  SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck8
-  GetFunctionAddress $2 un.ck8Click
-  SkinBtn::onClick $ck8 $2
-  ${NSD_CreateLabel} 296 185 130 20 $(un.MSG_Reason8)
-  pop $ck8Text
-  NSISVCLStyles::RemoveStyleControl $ck8Text
-  SetCtlColors $ck8Text 98c8fe transparent
-  ${CustomSetFont} $ck8Text $(un.MSG_FontName) 10 700
-  ; feedback options end --------------------------------------------------------
-
-  nsDialogs::CreateControl EDIT \
-    "${__NSD_Text_STYLE}||${ES_MULTILINE}|${ES_WANTRETURN}|${ES_AUTOVSCROLL}|${ES_AUTOHSCROLL}|${WS_BORDER}" \
-    "${__NSD_Text_EXSTYLE}" \
-    50 220 420 70 \
-    $(un.MSG_OtherReason)
-    Pop $otherText
-  SetCtlColors $otherText b6d8fe 418BDB
-  ${CustomSetFont} $otherText $(un.MSG_FontName) 10 500
-  EnableWindow $otherText 0
-  
-  ${NSD_CreateButton} 112 325 138 42 ""
-  Pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SkinBtn::Set /IMGID=$(MSG_ImgBtnStartUninstall) $0
-  GetFunctionAddress $3 un.StartUninstall
-  SkinBtn::onClick $0 $3
-
-  ; cancel button
-  ${NSD_CreateButton} 282 325 138 42 ""
-  Pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel) $0
-  GetFunctionAddress $1 un.FinishClick
-  SkinBtn::onClick $0 $1
-
-  ; background
-  ${NSD_CreateBitmap} 0 0 100% 100% ""
-  Pop $BGImage
-  ${NSD_SetImage} $BGImage ${RESOURCE_IMG_PATH}\unFeedbackBG.bmp $ImageHandle
-  Call un.EnglishPage
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $BGImage $0 ; handle the window moved
-  nsDialogs::Show
-FunctionEnd
-
-Function un.onGUICallback
-  ${If} $MSG == ${WM_LBUTTONDOWN}
-    SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
-  ${EndIf}
-FunctionEnd
-
-Function un.InstallFiles1
-  FindWindow $R2 "#32770" "" $HWNDPARENT
-
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $1 $R2 1027
-  ShowWindow $0 ${SW_HIDE}
-
-  GetDlgItem $1 $R2 1
-  ShowWindow $1 ${SW_HIDE}
-  GetDlgItem $1 $R2 2
-  ShowWindow $1 ${SW_HIDE}
-  GetDlgItem $1 $R2 3
-  ShowWindow $1 ${SW_HIDE}
-
-  StrCpy $R0 $R2 ; change the size of the page. Otherwise the background will not show all
-  System::Call "user32::MoveWindow(i R0, i 0, i 0, i 520, i 400) i r2"
-  SetCtlColors $R0 ""  transparent ; set the background be transparent
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $R0 $0 ; handle the window moved
-
-  GetDlgItem $R0 $R2 1004  ; set the progress bar position
-  System::Call "user32::MoveWindow(i R0, i 16, i 325, i 481, i 18) i r2"
-  SkinProgress::Set $R0 "${RESOURCE_IMG_PATH}\progress.bmp" "${RESOURCE_IMG_PATH}\progressBG.bmp"
-
-  GetDlgItem $R1 $R2 1006  ; set the label.
-  NSISVCLStyles::RemoveStyleControl $R1
-  SetCtlColors $R1 ""  FFFFFF ; color with F6F6F6, Cannot set the background transparent
-  System::Call "user32::MoveWindow(i R1, i 16, i 350, i 481, i 12) i r2"
-  ${NSD_SetText} $R1 $(un.MSG_CocosUninstaller)
-
-  FindWindow $R2 "#32770" "" $HWNDPARENT  ; set the image
-  GetDlgItem $R0 $R2 1995
-  System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
-  ${NSD_SetImage} $R0 $(MSG_ImgUnFinishBG) $ImageHandle
-FunctionEnd
-
-Function un.InstallFinish
-  GetDlgItem $0 $HWNDPARENT 1 ; Next/close button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 2 ; cancel button
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 3 ; Pre button
-  ShowWindow $0 ${SW_HIDE}
-
-  GetDlgItem $0 $HWNDPARENT 1990
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1991
-  ShowWindow $0 ${SW_HIDE}
-  GetDlgItem $0 $HWNDPARENT 1992
-  ShowWindow $0 ${SW_HIDE}
-
-  nsDialogs::Create /NOUNLOAD 1044
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-  SetCtlColors $0 ""  transparent ; set the background be transparent.
-  ${NSW_SetWindowSize} $0 520 400 ; change the size of the page.
-
-  ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
-  Pop $R1
-  NSISVCLStyles::RemoveStyleControl $R1
-  SetCtlColors $R1 A7BAF5 transparent
-  ${CustomSetFont} $R1 $(un.MSG_FontName) 16 400
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $R1 $0
-
-  ; finish button
-  ${NSD_CreateButton} 203 311 138 42 ""
-  Pop $0
-  NSISVCLStyles::RemoveStyleControl $0
-  SkinBtn::Set /IMGID=$(MSG_ImgBtnFinish) $0
-  GetFunctionAddress $1 un.FinishClick
-  SkinBtn::onClick $0 $1
-
-  ; set the background image
-  ${NSD_CreateBitmap} 0 0 100% 100% ""
-  Pop $BGImage
-  ${NSD_SetImage} $BGImage $(MSG_ImgUnFinishBG) $ImageHandle
-
-  GetFunctionAddress $0 un.onGUICallback
-  WndProc::onCallback $BGImage $0 ; handle the window moved
-  nsDialogs::Show
-FunctionEnd
-
-Function un.StartUninstall
-  Call un.IsRunning
-  Call un.NextPage
-FunctionEnd
-
-Function un.NextPage
-  StrCpy $R9 1 ;Goto the next page
-  IntCmp $R9 0 0 Move Move
-  StrCmp $R9 "X" 0 Move
-  StrCpy $R9 "120"
-  Move:
-  SendMessage $HWNDPARENT "0x408" "$R9" ""
-  Abort
-FunctionEnd
-
-Function un.NSD_TimerFun
-  GetFunctionAddress $0 un.NSD_TimerFun
-  nsDialogs::KillTimer $0
-  !if 1   ; whether running in background, 1 is true.
-      GetFunctionAddress $0 un.InstallationMainFun
-      BgWorker::CallAndWait
-  !else
-      Call un.InstallationMainFun
-  !endif
-FunctionEnd
-
-Function un.InstallationMainFun
-  Call un.DeleteReg
-
-  Delete "$INSTDIR\${PRODUCT_UNINST_NAME}"
-  RMDir /r /REBOOTOK "$INSTDIR"
-
-  Call un.NextPage
-FunctionEnd
-
-Function un.FinishClick
-SendMessage $HWNDPARENT ${WM_CLOSE} 0 0
-FunctionEnd
-
-; minimize the window
-Function un.MinisizeWindows
-  ShowWindow $HWNDPARENT ${SW_MINIMIZE}
-FunctionEnd
-
-; TODO Cocos Creator is running
-Function un.IsRunning
-  FindProcDLL::FindProc "Cocos.exe"
-  Sleep 500
-  Pop $R0
-  ; ${If} $R0 != 0
-  ;   MessageBox MB_OK $(MSG_PleaseCloseCocos)
-  ;   Abort
-  ; ${EndIf}
-FunctionEnd
-
-Function un.ck1Click
-  ${If} $ck1Flag == "True"
-    ShowWindow $ck1Text ${SW_HIDE}
-    SetCtlColors $ck1Text 98c8fe transparent
-    ShowWindow $ck1Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck1
-    Push "False"
-    Pop $ck1Flag
-  ${Else}
-    ShowWindow $ck1Text ${SW_HIDE}
-    SetCtlColors $ck1Text fffffff transparent
-    ShowWindow $ck1Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck1
-    Push "True"
-    Pop $ck1Flag
-  ${EndIf}
-FunctionEnd
-
-Function un.ck2Click
-  ${If} $ck2Flag == "True"
-    ShowWindow $ck2Text ${SW_HIDE}
-    SetCtlColors $ck2Text 98c8fe transparent
-    ShowWindow $ck2Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck2
-    Push "False"
-    Pop $ck2Flag
-  ${Else}
-    ShowWindow $ck2Text ${SW_HIDE}
-    SetCtlColors $ck2Text fffffff transparent
-    ShowWindow $ck2Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck2
-    Push "True"
-    Pop $ck2Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck3Click
-  ${If} $ck3Flag == "True"
-    ShowWindow $ck3Text ${SW_HIDE}
-    SetCtlColors $ck3Text 98c8fe transparent
-    ShowWindow $ck3Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck3
-    Push "False"
-    Pop $ck3Flag
-  ${Else}
-    ShowWindow $ck3Text ${SW_HIDE}
-    SetCtlColors $ck3Text fffffff transparent
-    ShowWindow $ck3Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck3
-    Push "True"
-    Pop $ck3Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck4Click
-  ${If} $ck4Flag == "True"
-    ShowWindow $ck4Text ${SW_HIDE}
-    SetCtlColors $ck4Text 98c8fe transparent
-    ShowWindow $ck4Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck4
-    Push "False"
-    Pop $ck4Flag
-  ${Else}
-    ShowWindow $ck4Text ${SW_HIDE}
-    SetCtlColors $ck4Text fffffff transparent
-    ShowWindow $ck4Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck4
-    Push "True"
-    Pop $ck4Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck5Click
-  ${If} $ck5Flag == "True"
-    ShowWindow $ck5Text ${SW_HIDE}
-    SetCtlColors $ck5Text 98c8fe transparent
-    ShowWindow $ck5Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck5
-    Push "False"
-    Pop $ck5Flag
-  ${Else}
-    ShowWindow $ck5Text ${SW_HIDE}
-    SetCtlColors $ck5Text fffffff transparent
-    ShowWindow $ck5Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck5
-    Push "True"
-    Pop $ck5Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck6Click
-  ${If} $ck6Flag == "True"
-    ShowWindow $ck6Text ${SW_HIDE}
-    SetCtlColors $ck6Text 98c8fe transparent
-    ShowWindow $ck6Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck6
-    Push "False"
-    Pop $ck6Flag
-  ${Else}
-    ShowWindow $ck6Text ${SW_HIDE}
-    SetCtlColors $ck6Text fffffff transparent
-    ShowWindow $ck6Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck6
-    Push "True"
-    Pop $ck6Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck7Click
-  ${If} $ck7Flag == "True"
-    ShowWindow $ck7Text ${SW_HIDE}
-    SetCtlColors $ck7Text 98c8fe transparent
-    ShowWindow $ck7Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck7
-    EnableWindow $otherText 0
-    Push "False"
-    Pop $ck7Flag
-  ${Else}
-    ShowWindow $ck7Text ${SW_HIDE}
-    SetCtlColors $ck7Text fffffff transparent
-    ShowWindow $ck7Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck7
-    EnableWindow $otherText 1
-    Push "True"
-    Pop $ck7Flag
-  ${EndIf}
-FunctionEnd
-Function un.ck8Click
-  ${If} $ck8Flag == "True"
-    ShowWindow $ck8Text ${SW_HIDE}
-    SetCtlColors $ck8Text 98c8fe transparent
-    ShowWindow $ck8Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck8
-    Push "False"
-    Pop $ck8Flag
-  ${Else}
-    ShowWindow $ck8Text ${SW_HIDE}
-    SetCtlColors $ck8Text fffffff transparent
-    ShowWindow $ck8Text ${SW_SHOW}
-    SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck8
-    Push "True"
-    Pop $ck8Flag
-  ${EndIf}
-FunctionEnd
+; TODO custom uninstaller
+;;;;; Var ck1
+;;;;; Var ck1Text
+;;;;; Var ck1Flag
+;;;;; 
+;;;;; Var ck2
+;;;;; Var ck2Text
+;;;;; Var ck2Flag
+;;;;; 
+;;;;; Var ck3
+;;;;; Var ck3Text
+;;;;; Var ck3Flag
+;;;;; 
+;;;;; Var ck4
+;;;;; Var ck4Text
+;;;;; Var ck4Flag
+;;;;; 
+;;;;; Var ck5
+;;;;; Var ck5Text
+;;;;; Var ck5Flag
+;;;;; 
+;;;;; Var ck6
+;;;;; Var ck6Text
+;;;;; Var ck6Flag
+;;;;; 
+;;;;; Var ck7
+;;;;; Var ck7Text
+;;;;; Var ck7Flag
+;;;;; 
+;;;;; Var ck8
+;;;;; Var ck8Text
+;;;;; Var ck8Flag
+;;;;; 
+;;;;; Var otherText
+;;;;; 
+;;;;; Function un.onInit
+;;;;;   ${If} $LANGUAGE == 1033
+;;;;;     Push True
+;;;;;     Pop $IsEnglish
+;;;;;   ${Else}
+;;;;;     Push False
+;;;;;     Pop $IsEnglish
+;;;;;   ${EndIf}
+;;;;; 
+;;;;;   InitPluginsDir
+;;;;; 
+;;;;;   ; unzip the resources files
+;;;;;   SetOutPath "${RESOURCE_IMG_PATH}"
+;;;;;   File /r "resources\images\*.bmp"
+;;;;;   File "resources\Skin\CocosCreator.vsf"
+;;;;; 
+;;;;;   NSISVCLStyles::LoadVCLStyle  ${RESOURCE_IMG_PATH}\CocosCreator.vsf
+;;;;; 
+;;;;;   SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1.bmp"
+;;;;;   SkinBtn::Init "${RESOURCE_IMG_PATH}\ck1_1.bmp"
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.onGUIInit1
+;;;;;   System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
+;;;;; 
+;;;;;   ; hide some widgets
+;;;;;   GetDlgItem $0 $HWNDPARENT 1034
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1035
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1036
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1037
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1038
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1039
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1256
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1028
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   ${NSW_SetWindowSize} $HWNDPARENT 520 400 ; change the size of window
+;;;;;   System::Call User32::GetDesktopWindow()i.R0
+;;;;;   ;圆角
+;;;;;   System::Alloc 16
+;;;;;   System::Call user32::GetWindowRect(i$HWNDPARENT,isR0)
+;;;;;   System::Call *$R0(i.R1,i.R2,i.R3,i.R4)
+;;;;;   IntOp $R3 $R3 - $R1
+;;;;;   IntOp $R4 $R4 - $R2
+;;;;;   System::Call gdi32::CreateRoundRectRgn(i0,i0,iR3,iR4,i4,i4)i.r0
+;;;;;   System::Call user32::SetWindowRgn(i$HWNDPARENT,ir0,i1)
+;;;;;   System::Free $R0
+;;;;; FunctionEnd
+;;;;; 
+;;;;; ; uninstall welcome page
+;;;;; Function un.UnPageWelcome
+;;;;;   GetDlgItem $0 $HWNDPARENT 1 ; Next/Close button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 2 ; cancel button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 3 ; Pre button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   GetDlgItem $0 $HWNDPARENT 1990
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1991
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1992
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   
+;;;;;   nsDialogs::Create /NOUNLOAD 1044
+;;;;;   Pop $0
+;;;;;   ${If} $0 == error
+;;;;;     Abort
+;;;;;   ${EndIf}
+;;;;;   SetCtlColors $0 ""  transparent ;set the background be transparent.
+;;;;;   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
+;;;;; 
+;;;;;   ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
+;;;;;   Pop $R1
+;;;;;   NSISVCLStyles::RemoveStyleControl $R1
+;;;;;   SetCtlColors $R1 A7BAF5 transparent
+;;;;;   ${CustomSetFont} $R1 $(un.MSG_FontName) 16 400
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $R1 $0
+;;;;; 
+;;;;;   ;close button 
+;;;;;   ${NSD_CreateButton} 495 0 25 25 ""
+;;;;;   Pop $btn_Close
+;;;;;   NSISVCLStyles::RemoveStyleControl $btn_Close
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
+;;;;;   GetFunctionAddress $1 un.FinishClick
+;;;;;   SkinBtn::onClick $btn_Close $1
+;;;;; 
+;;;;;   ;minimize button
+;;;;;   ${NSD_CreateButton} 470 0 25 25 ""
+;;;;;   Pop $1
+;;;;;   NSISVCLStyles::RemoveStyleControl $1
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
+;;;;;   GetFunctionAddress $0 un.MinisizeWindows
+;;;;;   SkinBtn::onClick $1 $0
+;;;;; 
+;;;;;   ; uninstall 
+;;;;;   ${NSD_CreateButton} 112 325 138 42 ""
+;;;;;   Pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SkinBtn::Set /IMGID=$(MSG_ImgBtnUninstall) $0
+;;;;;   GetFunctionAddress $3 un.NextPage
+;;;;;   SkinBtn::onClick $0 $3
+;;;;; 
+;;;;;   ; cancel uninstall
+;;;;;   ${NSD_CreateButton} 282 325 138 42 ""
+;;;;;   Pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel1) $0
+;;;;;   GetFunctionAddress $1 un.FinishClick
+;;;;;   SkinBtn::onClick $0 $1
+;;;;; 
+;;;;;   ;Set the image of background
+;;;;;   ${NSD_CreateBitmap} 0 0 100% 100% ""
+;;;;;   Pop $BGImage
+;;;;;   ${NSD_SetImage} $BGImage $(MSG_ImgUninstallBG) $ImageHandle
+;;;;;   
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $BGImage $0 ; handle the window moved
+;;;;;   nsDialogs::Show
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.EnglishPage
+;;;;;   ${If} $IsEnglish == True
+;;;;;     nsResize::Set $ck1 50 92 16 16
+;;;;;     nsResize::Set $ck1Text 76 90 180 30
+;;;;;   
+;;;;;     nsResize::Set $ck2 270 92 16 16
+;;;;;     nsResize::Set $ck2Text 296 90 180 30
+;;;;; 
+;;;;;     nsResize::Set $ck3 50 122 16 16
+;;;;;     nsResize::Set $ck3Text 76 120 180 30
+;;;;; 
+;;;;;     nsResize::Set $ck4 270 122 16 16
+;;;;;     nsResize::Set $ck4Text 296 120 180 30
+;;;;; 
+;;;;;     nsResize::Set $ck5 50 154 16 16
+;;;;;     nsResize::Set $ck5Text 76 152 180 30
+;;;;; 
+;;;;;     nsResize::Set $ck6 270 154 16 16
+;;;;;     nsResize::Set $ck6Text 296 152 180 30
+;;;;; 
+;;;;;     nsResize::Set $ck7 50 187 16 16
+;;;;;     nsResize::Set $ck7Text 76 185 180 30
+;;;;;   
+;;;;;     nsResize::Set $ck8 270 187 16 16
+;;;;;     nsResize::Set $ck8Text 296 185 180 30
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.FeedbackPage
+;;;;;   GetDlgItem $0 $HWNDPARENT 1 ; next/close button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 2 ; cancel button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 3 ; pre button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   GetDlgItem $0 $HWNDPARENT 1990
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1991
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1992
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;  
+;;;;;   nsDialogs::Create /NOUNLOAD 1044
+;;;;;   Pop $0
+;;;;;   ${If} $0 == error
+;;;;;     Abort
+;;;;;   ${EndIf}
+;;;;; 
+;;;;;   ;SetCtlColors $0 ""  transparent ;set the background be transparent.
+;;;;;   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page
+;;;;; 
+;;;;;   ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
+;;;;;   Pop $R1
+;;;;;   NSISVCLStyles::RemoveStyleControl $R1
+;;;;;   SetCtlColors $R1 A7BAF5 transparent
+;;;;;   ${CustomSetFont} $R1 $(un.MSG_FontName) 10 700
+;;;;;   ;GetFunctionAddress $0 un.onGUICallback
+;;;;;   ;WndProc::onCallback $R1 $0
+;;;;;   
+;;;;;   ;close button 
+;;;;;   ${NSD_CreateButton} 495 0 25 25 ""
+;;;;;   Pop $btn_Close
+;;;;;   NSISVCLStyles::RemoveStyleControl $btn_Close
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\exit.bmp $btn_Close
+;;;;;   GetFunctionAddress $1 un.FinishClick
+;;;;;   SkinBtn::onClick $btn_Close $1
+;;;;; 
+;;;;;   ;minimize button
+;;;;;   ${NSD_CreateButton} 470 0 25 25 ""
+;;;;;   Pop $1
+;;;;;   NSISVCLStyles::RemoveStyleControl $1
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\minimize.bmp $1
+;;;;;   GetFunctionAddress $0 un.MinisizeWindows
+;;;;;   SkinBtn::onClick $1 $0
+;;;;; 
+;;;;;   ${NSD_CreateLabel} 50 46 300 20 $(un.MSG_LasterTitle)
+;;;;;   pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SetCtlColors $0 fffffff transparent
+;;;;;   ${CustomSetFont} $0 $(un.MSG_FontName) 10 700
+;;;;;   
+;;;;;   ;feedback options begin --------------------------------------------------------------
+;;;;;   ${NSD_CreateButton} 50 92 16 16 ""
+;;;;;   Pop $ck1
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck1
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck1
+;;;;;   GetFunctionAddress $2 un.ck1Click
+;;;;;   SkinBtn::onClick $ck1 $2
+;;;;;   ${NSD_CreateLabel} 76 90 124 20 $(un.MSG_Reason1)
+;;;;;   pop $ck1Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck1Text
+;;;;;   SetCtlColors $ck1Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck1Text $(un.MSG_FontName) 10 700
+;;;;;   ;GetFunctionAddress $0 un.MouseDown
+;;;;;   ;WndProc::onCallback $ck1Text $0
+;;;;;   
+;;;;;   ${NSD_CreateButton} 270 92 16 16 ""
+;;;;;   Pop $ck2
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck2
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck2
+;;;;;   GetFunctionAddress $2 un.ck2Click
+;;;;;   SkinBtn::onClick $ck2 $2
+;;;;;   ${NSD_CreateLabel} 296 90 130 20 $(un.MSG_Reason2)
+;;;;;   pop $ck2Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck2Text
+;;;;;   SetCtlColors $ck2Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck2Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 50 122 16 16 ""
+;;;;;   Pop $ck3
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck3
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck3
+;;;;;   GetFunctionAddress $2 un.ck3Click
+;;;;;   SkinBtn::onClick $ck3 $2
+;;;;;   ${NSD_CreateLabel} 76 120 130 20 $(un.MSG_Reason3)
+;;;;;   pop $ck3Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck3Text
+;;;;;   SetCtlColors $ck3Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck3Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 270 122 16 16 ""
+;;;;;   Pop $ck4
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck4
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck4
+;;;;;   GetFunctionAddress $2 un.ck4Click
+;;;;;   SkinBtn::onClick $ck4 $2
+;;;;;   ${NSD_CreateLabel} 296 120 130 20 $(un.MSG_Reason4)
+;;;;;   pop $ck4Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck4Text
+;;;;;   SetCtlColors $ck4Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck4Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 50 154 16 16 ""
+;;;;;   Pop $ck5
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck5
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck5
+;;;;;   GetFunctionAddress $2 un.ck5Click
+;;;;;   SkinBtn::onClick $ck5 $2
+;;;;;   ${NSD_CreateLabel} 76 152 130 20 $(un.MSG_Reason5)
+;;;;;   pop $ck5Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck5Text
+;;;;;   SetCtlColors $ck5Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck5Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 270 154 16 16 ""
+;;;;;   Pop $ck6
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck6
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck6
+;;;;;   GetFunctionAddress $2 un.ck6Click
+;;;;;   SkinBtn::onClick $ck6 $2
+;;;;;   ${NSD_CreateLabel} 296 152 130 20 $(un.MSG_Reason6)
+;;;;;   pop $ck6Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck6Text
+;;;;;   SetCtlColors $ck6Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck6Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 50 187 16 16 ""
+;;;;;   Pop $ck7
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck7
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck7
+;;;;;   GetFunctionAddress $2 un.ck7Click
+;;;;;   SkinBtn::onClick $ck7 $2
+;;;;;   ${NSD_CreateLabel} 76 185 130 20 $(un.MSG_Reason7)
+;;;;;   pop $ck7Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck7Text
+;;;;;   SetCtlColors $ck7Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck7Text $(un.MSG_FontName) 10 700
+;;;;; 
+;;;;;   ${NSD_CreateButton} 270 187 16 16 ""
+;;;;;   Pop $ck8
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck8
+;;;;;   SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck8
+;;;;;   GetFunctionAddress $2 un.ck8Click
+;;;;;   SkinBtn::onClick $ck8 $2
+;;;;;   ${NSD_CreateLabel} 296 185 130 20 $(un.MSG_Reason8)
+;;;;;   pop $ck8Text
+;;;;;   NSISVCLStyles::RemoveStyleControl $ck8Text
+;;;;;   SetCtlColors $ck8Text 98c8fe transparent
+;;;;;   ${CustomSetFont} $ck8Text $(un.MSG_FontName) 10 700
+;;;;;   ; feedback options end --------------------------------------------------------
+;;;;; 
+;;;;;   nsDialogs::CreateControl EDIT \
+;;;;;     "${__NSD_Text_STYLE}||${ES_MULTILINE}|${ES_WANTRETURN}|${ES_AUTOVSCROLL}|${ES_AUTOHSCROLL}|${WS_BORDER}" \
+;;;;;     "${__NSD_Text_EXSTYLE}" \
+;;;;;     50 220 420 70 \
+;;;;;     $(un.MSG_OtherReason)
+;;;;;     Pop $otherText
+;;;;;   SetCtlColors $otherText b6d8fe 418BDB
+;;;;;   ${CustomSetFont} $otherText $(un.MSG_FontName) 10 500
+;;;;;   EnableWindow $otherText 0
+;;;;;   
+;;;;;   ${NSD_CreateButton} 112 325 138 42 ""
+;;;;;   Pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SkinBtn::Set /IMGID=$(MSG_ImgBtnStartUninstall) $0
+;;;;;   GetFunctionAddress $3 un.StartUninstall
+;;;;;   SkinBtn::onClick $0 $3
+;;;;; 
+;;;;;   ; cancel button
+;;;;;   ${NSD_CreateButton} 282 325 138 42 ""
+;;;;;   Pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SkinBtn::Set /IMGID=$(MSG_ImgBtnCancel) $0
+;;;;;   GetFunctionAddress $1 un.FinishClick
+;;;;;   SkinBtn::onClick $0 $1
+;;;;; 
+;;;;;   ; background
+;;;;;   ${NSD_CreateBitmap} 0 0 100% 100% ""
+;;;;;   Pop $BGImage
+;;;;;   ${NSD_SetImage} $BGImage ${RESOURCE_IMG_PATH}\unFeedbackBG.bmp $ImageHandle
+;;;;;   Call un.EnglishPage
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $BGImage $0 ; handle the window moved
+;;;;;   nsDialogs::Show
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.onGUICallback
+;;;;;   ${If} $MSG == ${WM_LBUTTONDOWN}
+;;;;;     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.InstallFiles1
+;;;;;   FindWindow $R2 "#32770" "" $HWNDPARENT
+;;;;; 
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $1 $R2 1027
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   GetDlgItem $1 $R2 1
+;;;;;   ShowWindow $1 ${SW_HIDE}
+;;;;;   GetDlgItem $1 $R2 2
+;;;;;   ShowWindow $1 ${SW_HIDE}
+;;;;;   GetDlgItem $1 $R2 3
+;;;;;   ShowWindow $1 ${SW_HIDE}
+;;;;; 
+;;;;;   StrCpy $R0 $R2 ; change the size of the page. Otherwise the background will not show all
+;;;;;   System::Call "user32::MoveWindow(i R0, i 0, i 0, i 520, i 400) i r2"
+;;;;;   SetCtlColors $R0 ""  transparent ; set the background be transparent
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $R0 $0 ; handle the window moved
+;;;;; 
+;;;;;   GetDlgItem $R0 $R2 1004  ; set the progress bar position
+;;;;;   System::Call "user32::MoveWindow(i R0, i 16, i 325, i 481, i 18) i r2"
+;;;;;   SkinProgress::Set $R0 "${RESOURCE_IMG_PATH}\progress.bmp" "${RESOURCE_IMG_PATH}\progressBG.bmp"
+;;;;; 
+;;;;;   GetDlgItem $R1 $R2 1006  ; set the label.
+;;;;;   NSISVCLStyles::RemoveStyleControl $R1
+;;;;;   SetCtlColors $R1 ""  FFFFFF ; color with F6F6F6, Cannot set the background transparent
+;;;;;   System::Call "user32::MoveWindow(i R1, i 16, i 350, i 481, i 12) i r2"
+;;;;;   ${NSD_SetText} $R1 $(un.MSG_CocosUninstaller)
+;;;;; 
+;;;;;   FindWindow $R2 "#32770" "" $HWNDPARENT  ; set the image
+;;;;;   GetDlgItem $R0 $R2 1995
+;;;;;   System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
+;;;;;   ${NSD_SetImage} $R0 $(MSG_ImgUnFinishBG) $ImageHandle
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.InstallFinish
+;;;;;   GetDlgItem $0 $HWNDPARENT 1 ; Next/close button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 2 ; cancel button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 3 ; Pre button
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   GetDlgItem $0 $HWNDPARENT 1990
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1991
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;;   GetDlgItem $0 $HWNDPARENT 1992
+;;;;;   ShowWindow $0 ${SW_HIDE}
+;;;;; 
+;;;;;   nsDialogs::Create /NOUNLOAD 1044
+;;;;;   Pop $0
+;;;;;   ${If} $0 == error
+;;;;;     Abort
+;;;;;   ${EndIf}
+;;;;;   SetCtlColors $0 ""  transparent ; set the background be transparent.
+;;;;;   ${NSW_SetWindowSize} $0 520 400 ; change the size of the page.
+;;;;; 
+;;;;;   ${NSD_CreateLabel} 20 11 180 30 $(un.MSG_CocosUninstaller)
+;;;;;   Pop $R1
+;;;;;   NSISVCLStyles::RemoveStyleControl $R1
+;;;;;   SetCtlColors $R1 A7BAF5 transparent
+;;;;;   ${CustomSetFont} $R1 $(un.MSG_FontName) 16 400
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $R1 $0
+;;;;; 
+;;;;;   ; finish button
+;;;;;   ${NSD_CreateButton} 203 311 138 42 ""
+;;;;;   Pop $0
+;;;;;   NSISVCLStyles::RemoveStyleControl $0
+;;;;;   SkinBtn::Set /IMGID=$(MSG_ImgBtnFinish) $0
+;;;;;   GetFunctionAddress $1 un.FinishClick
+;;;;;   SkinBtn::onClick $0 $1
+;;;;; 
+;;;;;   ; set the background image
+;;;;;   ${NSD_CreateBitmap} 0 0 100% 100% ""
+;;;;;   Pop $BGImage
+;;;;;   ${NSD_SetImage} $BGImage $(MSG_ImgUnFinishBG) $ImageHandle
+;;;;; 
+;;;;;   GetFunctionAddress $0 un.onGUICallback
+;;;;;   WndProc::onCallback $BGImage $0 ; handle the window moved
+;;;;;   nsDialogs::Show
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.StartUninstall
+;;;;;   Call un.IsRunning
+;;;;;   Call un.NextPage
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.NextPage
+;;;;;   StrCpy $R9 1 ;Goto the next page
+;;;;;   IntCmp $R9 0 0 Move Move
+;;;;;   StrCmp $R9 "X" 0 Move
+;;;;;   StrCpy $R9 "120"
+;;;;;   Move:
+;;;;;   SendMessage $HWNDPARENT "0x408" "$R9" ""
+;;;;;   Abort
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.NSD_TimerFun
+;;;;;   GetFunctionAddress $0 un.NSD_TimerFun
+;;;;;   nsDialogs::KillTimer $0
+;;;;;   !if 1   ; whether running in background, 1 is true.
+;;;;;       GetFunctionAddress $0 un.InstallationMainFun
+;;;;;       BgWorker::CallAndWait
+;;;;;   !else
+;;;;;       Call un.InstallationMainFun
+;;;;;   !endif
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.InstallationMainFun
+;;;;;   Call un.DeleteReg
+;;;;; 
+;;;;;   Delete "$INSTDIR\${PRODUCT_UNINST_NAME}"
+;;;;;   RMDir /r /REBOOTOK "$INSTDIR"
+;;;;; 
+;;;;;   Call un.NextPage
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.FinishClick
+;;;;; SendMessage $HWNDPARENT ${WM_CLOSE} 0 0
+;;;;; FunctionEnd
+;;;;; 
+;;;;; ; minimize the window
+;;;;; Function un.MinisizeWindows
+;;;;;   ShowWindow $HWNDPARENT ${SW_MINIMIZE}
+;;;;; FunctionEnd
+;;;;; 
+;;;;; ; TODO Cocos Creator is running
+;;;;; Function un.IsRunning
+;;;;;   FindProcDLL::FindProc "Cocos.exe"
+;;;;;   Sleep 500
+;;;;;   Pop $R0
+;;;;;   ; ${If} $R0 != 0
+;;;;;   ;   MessageBox MB_OK $(MSG_PleaseCloseCocos)
+;;;;;   ;   Abort
+;;;;;   ; ${EndIf}
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.ck1Click
+;;;;;   ${If} $ck1Flag == "True"
+;;;;;     ShowWindow $ck1Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck1Text 98c8fe transparent
+;;;;;     ShowWindow $ck1Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck1
+;;;;;     Push "False"
+;;;;;     Pop $ck1Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck1Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck1Text fffffff transparent
+;;;;;     ShowWindow $ck1Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck1
+;;;;;     Push "True"
+;;;;;     Pop $ck1Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; 
+;;;;; Function un.ck2Click
+;;;;;   ${If} $ck2Flag == "True"
+;;;;;     ShowWindow $ck2Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck2Text 98c8fe transparent
+;;;;;     ShowWindow $ck2Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck2
+;;;;;     Push "False"
+;;;;;     Pop $ck2Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck2Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck2Text fffffff transparent
+;;;;;     ShowWindow $ck2Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck2
+;;;;;     Push "True"
+;;;;;     Pop $ck2Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck3Click
+;;;;;   ${If} $ck3Flag == "True"
+;;;;;     ShowWindow $ck3Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck3Text 98c8fe transparent
+;;;;;     ShowWindow $ck3Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck3
+;;;;;     Push "False"
+;;;;;     Pop $ck3Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck3Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck3Text fffffff transparent
+;;;;;     ShowWindow $ck3Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck3
+;;;;;     Push "True"
+;;;;;     Pop $ck3Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck4Click
+;;;;;   ${If} $ck4Flag == "True"
+;;;;;     ShowWindow $ck4Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck4Text 98c8fe transparent
+;;;;;     ShowWindow $ck4Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck4
+;;;;;     Push "False"
+;;;;;     Pop $ck4Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck4Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck4Text fffffff transparent
+;;;;;     ShowWindow $ck4Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck4
+;;;;;     Push "True"
+;;;;;     Pop $ck4Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck5Click
+;;;;;   ${If} $ck5Flag == "True"
+;;;;;     ShowWindow $ck5Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck5Text 98c8fe transparent
+;;;;;     ShowWindow $ck5Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck5
+;;;;;     Push "False"
+;;;;;     Pop $ck5Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck5Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck5Text fffffff transparent
+;;;;;     ShowWindow $ck5Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck5
+;;;;;     Push "True"
+;;;;;     Pop $ck5Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck6Click
+;;;;;   ${If} $ck6Flag == "True"
+;;;;;     ShowWindow $ck6Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck6Text 98c8fe transparent
+;;;;;     ShowWindow $ck6Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck6
+;;;;;     Push "False"
+;;;;;     Pop $ck6Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck6Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck6Text fffffff transparent
+;;;;;     ShowWindow $ck6Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck6
+;;;;;     Push "True"
+;;;;;     Pop $ck6Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck7Click
+;;;;;   ${If} $ck7Flag == "True"
+;;;;;     ShowWindow $ck7Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck7Text 98c8fe transparent
+;;;;;     ShowWindow $ck7Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck7
+;;;;;     EnableWindow $otherText 0
+;;;;;     Push "False"
+;;;;;     Pop $ck7Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck7Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck7Text fffffff transparent
+;;;;;     ShowWindow $ck7Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck7
+;;;;;     EnableWindow $otherText 1
+;;;;;     Push "True"
+;;;;;     Pop $ck7Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
+;;;;; Function un.ck8Click
+;;;;;   ${If} $ck8Flag == "True"
+;;;;;     ShowWindow $ck8Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck8Text 98c8fe transparent
+;;;;;     ShowWindow $ck8Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\ckfalse.bmp $ck8
+;;;;;     Push "False"
+;;;;;     Pop $ck8Flag
+;;;;;   ${Else}
+;;;;;     ShowWindow $ck8Text ${SW_HIDE}
+;;;;;     SetCtlColors $ck8Text fffffff transparent
+;;;;;     ShowWindow $ck8Text ${SW_SHOW}
+;;;;;     SkinBtn::Set /IMGID=${RESOURCE_IMG_PATH}\cktrue.bmp $ck8
+;;;;;     Push "True"
+;;;;;     Pop $ck8Flag
+;;;;;   ${EndIf}
+;;;;; FunctionEnd
 
 Function un.DeleteReg
   DeleteRegValue HKLM "${PRODUCT_INST_KEY}" "${PRODUCT_INST_FOLDER_KEY}"
@@ -1643,5 +1650,8 @@ Function un.DeleteReg
 FunctionEnd
 
 Section Uninstall
-  Call un.InstallationMainFun
+  Call un.DeleteReg
+
+  Delete "$INSTDIR\${PRODUCT_UNINST_NAME}"
+  RMDir /r /REBOOTOK "$INSTDIR"
 SectionEnd
